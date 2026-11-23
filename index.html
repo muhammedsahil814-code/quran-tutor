@@ -1,0 +1,3149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quran Tutor — Online Academy Management Portal</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel for JSX Compilation in Browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Noto Sans Malayalam -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Malayalam', sans-serif;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-slate-950">
+  <div id="root"></div>
+
+  <!-- Firebase SDK Setup -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwUXBo5agArNyJQEgtZ_PEZj-b0TQlIoA",
+      authDomain: "quran-tutor-ffbc7.firebaseapp.com",
+      projectId: "quran-tutor-ffbc7",
+      storageBucket: "quran-tutor-ffbc7.firebasestorage.app",
+      messagingSenderId: "816872405751",
+      appId: "1:816872405751:web:47e69a4f49ac0e82e331f2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.db = getFirestore(app);
+    window.FirebaseFirestoreSDK = { doc, getDoc, setDoc };
+    window.firebaseLoaded = true;
+  </script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    function Icon({ name, className = "w-4 h-4" }) {
+      const ref = useRef(null);
+      useEffect(() => {
+        if (ref.current && window.lucide) {
+          ref.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`;
+          window.lucide.createIcons({ root: ref.current });
+        }
+      }, [name, className]);
+      return <span ref={ref} className="inline-flex items-center justify-center shrink-0" />;
+    }
+
+    const UI_TEXT = {
+      en: {
+        brandName: 'Quran Tutor',
+        brandTagline: '3-Month Structured Online Batch • Starts Dec 1 (3 Days/Week)',
+        langButton: 'മലയാളം',
+        lightMode: 'Light Mode',
+        darkMode: 'Dark Mode',
+        logout: 'Logout',
+        storageReady: 'Firebase Synced ⚡',
+        cloudSyncing: 'Syncing to Cloud...',
+        roleStudent: 'Student',
+        roleParent: 'Parent',
+        roleTeacher: 'Teacher',
+        roleFounder: 'Founder',
+        portalAccess: 'Portal Sign In',
+        portalSubtitle: 'Select your role and enter the Name and Password issued by Quran Tutor.',
+        nameLabel: 'Full Name',
+        namePlaceholder: 'Enter your registered name',
+        passwordLabel: 'Password',
+        passwordPlaceholder: 'Enter your password',
+        signInBtn: 'Sign In to Portal',
+        founderBannerTitle: 'Founder & Chief Assessor Access',
+        founderBannerDesc: 'Manage student/parent/teacher registrations, review weekly teacher reports, and publish live exam links.',
+        heroBadge: 'New Batch Starts December 1 • 12 Weeks / 36 Classes',
+        heroTitle: 'Structured Quran & Fiqh Learning Platform',
+        heroDesc: 'Track weekly lessons, participate in live online exams, log home practice hours, and receive Founder-verified weekly progress reports.',
+        course1Badge: 'Course 01 • 36 Classes',
+        course2Badge: 'Course 02 • 36 Classes',
+        tabRegister: 'Register & Passwords',
+        tabReviewReports: 'Review & Edit Reports',
+        tabExams: 'Live Exams & Links',
+        tabPublished: 'Parent Report Cards',
+        tabCurriculum: '12-Week Curriculum',
+        tabSettings: 'Settings',
+        regStudentParentTitle: 'Register Student & Parent Account',
+        regStudentParentSub: 'Create credentials for a new student, assign their course, teacher, and start date.',
+        studentName: 'Student Name',
+        studentAge: 'Student Age',
+        studentPassword: 'Student Password',
+        courseStartDate: 'Course Start Date',
+        selectCourse: 'Select Course',
+        assignTeacher: 'Assign Teacher',
+        parentName: 'Parent Name',
+        parentPassword: 'Parent Password',
+        createStudentParentBtn: 'Register Student & Parent',
+        regTeacherTitle: 'Register New Teacher',
+        teacherName: 'Teacher Name',
+        teacherPassword: 'Teacher Password',
+        createTeacherBtn: 'Register Teacher',
+        credentialsDirTitle: 'Issued Credentials Directory',
+        credentialsDirSub: 'Edit, delete, or copy Name & Password to share securely.',
+        copyCreds: 'Copy',
+        copied: 'Copied!',
+        submitReportTitle: 'Submit Weekly Progress Report',
+        submitReportSub: 'Submitted reports are sent to the Founder for review and approval.',
+        weekLabel: 'Week',
+        masteryScore: 'Lesson Mastery (%)',
+        attendanceScore: 'Attendance & Discipline (%)',
+        hifzDuaScore: 'Hifz / Dua Progress (%)',
+        overallGrade: 'Overall Grade',
+        teacherRemarks: 'Teacher Remarks',
+        submitToFounderBtn: 'Submit Report to Founder',
+        approvePublishBtn: 'Approve & Publish to Parent',
+        editOverrideBtn: 'Edit & Override',
+        pendingReviewBadge: 'Pending Founder Review',
+        publishedBadge: 'Published to Parent',
+        liveExamPortal: 'Live Exams & Weekly Assessments',
+        liveExamSub: 'Attempt scheduled online exams via link or take practice quiz.',
+        postExamTitle: 'Publish New Exam / Quiz Link',
+        examTitleLabel: 'Exam / Assessment Title',
+        examUrlLabel: 'Exam Link (Google Form / Quiz URL)',
+        publishExamBtn: 'Publish Exam Link',
+        openExamLink: 'Open Exam Link',
+        practiceQuizBtn: 'Practice Quiz',
+        tabLiveClass: 'Live Class Room',
+        liveClassroomTitle: 'Live Online Classroom & Video Call',
+        liveClassroomSub: 'Start an instant In-App Video Class or share a Google Meet / Zoom link.',
+        classTopicLabel: 'Class Topic / Lesson',
+        classScheduleLabel: 'Date & Time',
+        meetingPlatformLabel: 'Classroom Mode',
+        meetingLinkLabel: 'Google Meet / Zoom Link',
+        publishClassBtn: 'Start / Publish Live Class',
+        joinInAppVideoBtn: 'Join In-App Video Call',
+        openMeetLinkBtn: 'Open Meet / Zoom Link',
+        activeLiveClasses: 'Scheduled & Live Classes',
+        logHomeStudyTitle: 'Log Home Study Hours',
+        logHomeStudySub: 'Record daily or weekly revision hours completed at home.',
+        studyDateLabel: 'Date',
+        studyHoursLabel: 'Hours Studied',
+        studyNotesLabel: 'Practice Notes',
+        saveStudyLogBtn: 'Save Study Log',
+        officialReportCard: 'Official Weekly Progress Report Card',
+        printCard: 'Print',
+        shareSummary: 'Share Summary',
+        homeStudyHoursStat: 'Home Study Hours',
+        classesCompletedStat: 'Classes Completed',
+        latestGradeStat: 'Latest Verified Grade',
+        changePwdTitle: 'Update Founder Name & Password',
+        newNameLabel: 'Founder Full Name',
+        newPwdLabel: 'New Founder Password',
+        updatePwdBtn: 'Save Founder Profile',
+        logoUploadTitle: 'Academy Logo',
+        logoUploadDesc: 'Upload your official Quran Tutor logo.',
+        uploadLogoBtn: 'Upload Logo Image',
+        removeLogoBtn: 'Remove Logo',
+        resetDataTitle: 'Reset Portal Data',
+        resetDataDesc: 'Restore initial sample students, teachers, reports, and exam links.',
+        resetDataBtn: 'Reset Data'
+      },
+      ml: {
+        brandName: 'ഖുർആൻ ട്യൂട്ടർ (Quran Tutor)',
+        brandTagline: '3 മാസത്തെ ഓൺലൈൻ ബാച്ച് • ഡിസംബർ 1 മുതൽ (ആഴ്ചയിൽ 3 ദിവസം)',
+        langButton: 'English',
+        lightMode: 'ലൈറ്റ് മോഡ്',
+        darkMode: 'ഡാർക്ക് മോഡ്',
+        logout: 'ലോഗൗട്ട്',
+        storageReady: 'ഫയർബേസ് സിങ്ക് ആയി ⚡',
+        cloudSyncing: 'സിങ്ക് ചെയ്യുന്നു...',
+        roleStudent: 'വിദ്യാർത്ഥി (Student)',
+        roleParent: 'രക്ഷിതാവ് (Parent)',
+        roleTeacher: 'അധ്യാപകൻ (Teacher)',
+        roleFounder: 'ഫൗണ്ടർ (Founder)',
+        portalAccess: 'പോർട്ടൽ ലോഗിൻ',
+        portalSubtitle: 'നിങ്ങളുടെ വിഭാഗം തിരഞ്ഞെടുത്ത് ഖുർആൻ ട്യൂട്ടറിൽ നിന്ന് ലഭിച്ച പേരും പാസ്‌വേഡും നൽകുക.',
+        nameLabel: 'പേര് (Full Name)',
+        namePlaceholder: 'രജിസ്റ്റർ ചെയ്ത പേര് നൽകുക',
+        passwordLabel: 'പാസ്‌വേഡ് (Password)',
+        passwordPlaceholder: 'പാസ്‌വേഡ് നൽകുക',
+        signInBtn: 'പ്രവേശിക്കുക (Sign In)',
+        founderBannerTitle: 'ഫൗണ്ടർ & ചീഫ് അസസ്സർ പോർട്ടൽ',
+        founderBannerDesc: 'കുട്ടികളെയും രക്ഷിതാക്കളെയും അധ്യാപകരെയും രജിസ്റ്റർ ചെയ്യാനും പ്രോഗ്രസ് റിപ്പോർട്ടുകൾ പരിശോധിച്ച് പബ്ലിഷ് ചെയ്യാനും.',
+        heroBadge: 'പുതിയ ബാച്ച് ഡിസംബർ 1 മുതൽ • 12 ആഴ്ച / 36 ക്ലാസുകൾ',
+        heroTitle: 'ചിട്ടയായ ഖുർആൻ & ഫിഖ്ഹ് പഠന പ്ലാറ്റ്‌ഫോം',
+        heroDesc: 'ഓരോ ആഴ്ചയിലെയും പാഠങ്ങൾ പിന്തുടരാനും, ലൈവ് പരീക്ഷകളിൽ പങ്കെടുക്കാനും, വീട്ടിലെ പഠന സമയം രേഖപ്പെടുത്താനും, പ്രോഗ്രസ് റിപ്പോർട്ടുകൾ ലഭിക്കാനുമുള്ള പോർട്ടൽ.',
+        course1Badge: 'കോഴ്സ് 01 • 36 ക്ലാസുകൾ',
+        course2Badge: 'കോഴ്സ് 02 • 36 ക്ലാസുകൾ',
+        tabRegister: 'രജിസ്ട്രേഷൻ & പാസ്‌വേഡ്',
+        tabReviewReports: 'റിപ്പോർട്ട് പരിശോധന',
+        tabExams: 'ലൈവ് എക്സാം ലിങ്കുകൾ',
+        tabPublished: 'പാരന്റ് റിപ്പോർട്ട് കാർഡ്',
+        tabCurriculum: '12 ആഴ്ചത്തെ സിലബസ്',
+        tabSettings: 'സെറ്റിംഗ്സ്',
+        regStudentParentTitle: 'പുതിയ വിദ്യാർത്ഥിയെയും രക്ഷിതാവിനെയും രജിസ്റ്റർ ചെയ്യുക',
+        regStudentParentSub: 'കുട്ടിയുടെ പേര്, വയസ്സ്, പാസ്‌വേഡ്, കോഴ്സ്, ടീച്ചർ, കോഴ്സ് തുടങ്ങുന്ന തീയതി എന്നിവ നൽകുക.',
+        studentName: 'കുട്ടിയുടെ പേര് (Student Name)',
+        studentAge: 'കുട്ടിയുടെ വയസ്സ് (Age)',
+        studentPassword: 'കുട്ടിയുടെ പാസ്‌വേഡ്',
+        courseStartDate: 'കോഴ്സ് തുടങ്ങുന്ന തീയതി (Start Date)',
+        selectCourse: 'കോഴ്സ് തിരഞ്ഞെടുക്കുക',
+        assignTeacher: 'ടീച്ചറെ അസൈൻ ചെയ്യുക',
+        parentName: 'രക്ഷിതാവിന്റെ പേര് (Parent Name)',
+        parentPassword: 'രക്ഷിതാവിന്റെ പാസ്‌വേഡ്',
+        createStudentParentBtn: 'വിദ്യാർത്ഥിയെയും രക്ഷിതാവിനെയും രജിസ്റ്റർ ചെയ്യുക',
+        regTeacherTitle: 'പുതിയ ടീച്ചറെ രജിസ്റ്റർ ചെയ്യുക',
+        teacherName: 'ടീച്ചറുടെ പേര് (Teacher Name)',
+        teacherPassword: 'ടീച്ചറുടെ പാസ്‌വേഡ്',
+        createTeacherBtn: 'ടീച്ചറെ രജിസ്റ്റർ ചെയ്യുക',
+        credentialsDirTitle: 'ലോഗിൻ വിവരങ്ങൾ (Credentials Directory)',
+        credentialsDirSub: 'വിവരങ്ങൾ എഡിറ്റ് ചെയ്യാനും ഡിലീറ്റ് ചെയ്യാനും കോപ്പി ചെയ്ത് അയച്ചുകൊടുക്കാനും.',
+        copyCreds: 'കോപ്പി',
+        copied: 'കോപ്പി ചെയ്തു!',
+        submitReportTitle: 'വീക്കിലി പ്രോഗ്രസ് റിപ്പോർട്ട് സമർപ്പിക്കുക',
+        submitReportSub: 'ടീച്ചർ സമർപ്പിക്കുന്ന റിപ്പോർട്ട് ഫൗണ്ടർ പരിശോധിച്ച് അംഗീകരിച്ച ശേഷം രക്ഷിതാക്കൾക്ക് ലഭ്യമാകും.',
+        weekLabel: 'ആഴ്ച (Week)',
+        masteryScore: 'പാഠഭാഗ മികവ് (%)',
+        attendanceScore: 'ഹാജർ & അച്ചടക്കം (%)',
+        hifzDuaScore: 'ഹിഫ്‌ള് / ദുആ പുരോഗതി (%)',
+        overallGrade: 'ഗ്രേഡ് (Grade)',
+        teacherRemarks: 'അധ്യാപകന്റെ കുറിപ്പ് (Remarks)',
+        submitToFounderBtn: 'ഫൗണ്ടർക്ക് സമർപ്പിക്കുക',
+        approvePublishBtn: 'അംഗീകരിച്ച് പാരന്റ്സിന് നൽകുക',
+        editOverrideBtn: 'തിരുത്തലുകൾ വരുത്തുക',
+        pendingReviewBadge: 'ഫൗണ്ടർ പരിശോധനയിൽ',
+        publishedBadge: 'പാരന്റ്സിന് നൽകി',
+        liveExamPortal: 'ഓൺലൈൻ പരീക്ഷകളും അസസ്മെന്റ് ലിങ്കുകളും',
+        liveExamSub: 'നിശ്ചയിച്ചിട്ടുള്ള പരീക്ഷാ ലിങ്കിലൂടെ പരീക്ഷ എഴുതുകയോ പ്രാക്ടീസ് ക്വിസ് ചെയ്യുകയോ ചെയ്യാം.',
+        postExamTitle: 'പുതിയ എക്സാം ലിങ്ക് ചേർക്കുക',
+        examTitleLabel: 'പരീക്ഷയുടെ പേര്',
+        examUrlLabel: 'പരീക്ഷാ ലിങ്ക് (URL)',
+        publishExamBtn: 'എക്സാം ലിങ്ക് പബ്ലിഷ് ചെയ്യുക',
+        openExamLink: 'പരീക്ഷാ ലിങ്ക് തുറക്കുക',
+        practiceQuizBtn: 'പ്രാക്ടീസ് ക്വിസ്',
+        tabLiveClass: 'ലൈവ് ക്ലാസ് റൂം',
+        liveClassroomTitle: 'ലൈവ് ഓൺലൈൻ ക്ലാസ് & വീഡിയോ കോൾ',
+        liveClassroomSub: 'ആപ്പിനുള്ളിൽ തന്നെ വീഡിയോ കോൾ തുടങ്ങുകയോ Google Meet / Zoom ലിങ്ക് കുട്ടികൾക്ക് നൽകുകയോ ചെയ്യാം.',
+        classTopicLabel: 'പാഠഭാഗം / വിഷയം',
+        classScheduleLabel: 'തീയതി & സമയം',
+        meetingPlatformLabel: 'ക്ലാസ് മോഡ്',
+        meetingLinkLabel: 'Google Meet / Zoom ലിങ്ക്',
+        publishClassBtn: 'ലൈവ് ക്ലാസ് പബ്ലിഷ് ചെയ്യുക',
+        joinInAppVideoBtn: 'വീഡിയോ കോളിൽ കയറുക (In-App)',
+        openMeetLinkBtn: 'Meet / Zoom ലിങ്ക് തുറക്കുക',
+        activeLiveClasses: 'ലൈവ് & ഷെഡ്യൂൾ ചെയ്ത ക്ലാസുകൾ',
+        logHomeStudyTitle: 'വീട്ടിലെ പഠന സമയം രേഖപ്പെടുത്തുക',
+        logHomeStudySub: 'കുട്ടി വീട്ടിൽ പഠിച്ച മണിക്കൂറുകളും വിശദാംശങ്ങളും രേഖപ്പെടുത്തുക.',
+        studyDateLabel: 'തീയതി (Date)',
+        studyHoursLabel: 'പഠിച്ച മണിക്കൂർ (Hours)',
+        studyNotesLabel: 'പഠിച്ച പാഠങ്ങൾ / കുറിപ്പ്',
+        saveStudyLogBtn: 'സേവ് ചെയ്യുക',
+        officialReportCard: 'പ്രതിവാര പ്രോഗ്രസ് റിപ്പോർട്ട് കാർഡ്',
+        printCard: 'പ്രിന്റ്',
+        shareSummary: 'ഷെയർ',
+        homeStudyHoursStat: 'വീട്ടിലെ പഠന സമയം',
+        classesCompletedStat: 'പൂർത്തിയായ ക്ലാസുകൾ',
+        latestGradeStat: 'അവസാന ഗ്രേഡ്',
+        changePwdTitle: 'ഫൗണ്ടർ പേരും പാസ്‌വേഡും മാറ്റുക',
+        newNameLabel: 'ഫൗണ്ടറുടെ പേര് (Name)',
+        newPwdLabel: 'പുതിയ പാസ്‌വേഡ്',
+        updatePwdBtn: 'സേവ് ചെയ്യുക',
+        logoUploadTitle: 'അക്കാദമി ലോഗോ',
+        logoUploadDesc: 'നിങ്ങളുടെ ലോഗോ അപ്‌ലോഡ് ചെയ്യുക.',
+        uploadLogoBtn: 'ലോഗോ അപ്‌ലോഡ് ചെയ്യുക',
+        removeLogoBtn: 'ലോഗോ നീക്കം ചെയ്യുക',
+        resetDataTitle: 'ഡാറ്റ പുനഃക്രമീകരിക്കുക',
+        resetDataDesc: 'ആദ്യത്തെ ഡെമോ വിവരങ്ങളിലേക്ക് തിരികെ കൊണ്ടുവരാൻ.',
+        resetDataBtn: 'റീസെറ്റ് ഡാറ്റ'
+      }
+    };
+
+    // Helper to calculate dynamic weekly dates based on start date
+    function getDynamicWeeks(startDateStr) {
+      const start = startDateStr ? new Date(startDateStr) : new Date('2026-12-01');
+      const weeksData = [];
+      for (let w = 1; w <= 12; w++) {
+        const weekStart = new Date(start);
+        weekStart.setDate(start.getDate() + (w - 1) * 7);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        const options = { month: 'short', day: 'numeric' };
+        const dateStr = `${weekStart.toLocaleDateString('en-US', options)} - ${weekEnd.toLocaleDateString('en-US', options)}`;
+        weeksData.push({ weekNum: w, dateStr });
+      }
+      return weeksData;
+    }
+
+    const COURSES = {
+      QAIDA_RECITATION: {
+        id: 'QAIDA_RECITATION',
+        titleEn: 'Qaida & Recitation',
+        titleMl: 'ഖായിദ ആൻഡ് റെസിറ്റേഷൻ (Qaida & Recitation)',
+        duration: '3 Months (12 Weeks / 36 Classes)',
+        schedule: '3 Days / Week',
+        descEn: 'Master Arabic alphabet articulation (Makharij), Noorani Qaida rules, Tajweed principles, and fluent Juz Amma & Mushaf recitation.',
+        descMl: 'അറബി അക്ഷരങ്ങളുടെ കൃത്യമായ ഉച്ചാരണം (മഖ്റജ്), നൂറാനി ഖായിദ, തജ്‌വീദ് നിയമങ്ങൾ, ജുസ്അ് അമ്മ പാരായണം എന്നിവ പഠിപ്പിക്കുന്ന കോഴ്സ്.',
+        months: [
+          {
+            month: 1,
+            titleEn: 'Month 1: Noorani Qaida Foundations',
+            titleMl: 'മാസം 1: നൂറാനി ഖായിദ അടിസ്ഥാന പാഠങ്ങൾ',
+            weeks: [
+              { week: 1, classes: 'Class 1 - 3', topicEn: 'Arabic Alphabet & Makharij (Articulation Points)', topicMl: 'അറബി അക്ഷരമാലയും ഉച്ചാരണ സ്ഥാനങ്ങളും', details: ['Huroof al-Mufradat (Individual letters from Alif to Ya)', 'Primary articulation points (Makharij al-Huroof)', 'Distinguishing similar-sounding letters (ث-ص-س, د-ض, ك-ق)'] },
+              { week: 2, classes: 'Class 4 - 6', topicEn: 'Compound Letters & Harakat (Short Vowels)', topicMl: 'കൂട്ടക്ഷരങ്ങളും ഹറകത്തുകളും', details: ['Huroof al-Murakkabat (Joined letter forms)', 'Fatha, Kasra, and Damma pronunciation practice'] },
+              { week: 3, classes: 'Class 7 - 9', topicEn: 'Tanween & Madd (Elongation Letters)', topicMl: 'തൻവീനും മദ്ദുകളും', details: ['Tanween (Double vowels: An, In, Un) clarity', 'Huroof al-Madd (Alif, Waw, Ya) & Standing Harakat'] },
+              { week: 4, classes: 'Class 10 - 12', topicEn: 'Leen Letters & Month 1 Oral Assessment', topicMl: 'ലീൻ അക്ഷരങ്ങളും ഒന്നാം മാസത്തെ വിലയിരുത്തലും', details: ['Huroof al-Leen (Waw & Ya Sakinah preceded by Fatha)', 'Class 12: Monthly Oral Assessment 1'] }
+            ]
+          },
+          {
+            month: 2,
+            titleEn: 'Month 2: Advanced Qaida & Tajweed Rules',
+            titleMl: 'മാസം 2: നൂറാനി ഖായിദ (അഡ്വാൻസ്ഡ്) & തജ്‌വീദ് നിയമങ്ങൾ',
+            weeks: [
+              { week: 5, classes: 'Class 13 - 15', topicEn: 'Sukoon (Jazm) & Qalqalah (Echoing Letters)', topicMl: 'സുകൂനും ഖൽഖലയും', details: ['Connecting consonants with Sukoon smoothly', '5 Qalqalah letters (ق ط ب ج د) in middle and ending positions'] },
+              { week: 6, classes: 'Class 16 - 18', topicEn: 'Tashdeed (Doubling) & Ghunnah (Nasalization)', topicMl: 'തശ്ദീദും ഗുന്നത്തും', details: ['Stress and doubling rules on Mushaddad letters', 'Noon and Meem Mushaddadah 2-beat Ghunnah'] },
+              { week: 7, classes: 'Class 19 - 21', topicEn: 'Noon Sakinah & Tanween Rules', topicMl: 'നൂൻ സാക്കിൻ & തൻവീൻ നിയമങ്ങൾ', details: ['Izhar (Clear pronunciation) & Idgham (Merging with/without Ghunnah)', 'Iqlab (Conversion to Meem) & Ikhfa (Concealment)'] },
+              { week: 8, classes: 'Class 22 - 24', topicEn: 'Meem Sakinah Rules & Month 2 Assessment', topicMl: 'മീം സാക്കിൻ നിയമങ്ങളും രണ്ടാം മാസത്തെ വിലയിരുത്തലും', details: ['Ikhfa Shafawi, Idgham Shafawi & Izhar Shafawi', 'Class 24: Monthly Oral Assessment 2'] }
+            ]
+          },
+          {
+            month: 3,
+            titleEn: 'Month 3: Practical Recitation & Tajweed Mastery',
+            titleMl: 'മാസം 3: തജ്‌വീദ് പൂർത്തീകരണവും പ്രായോഗിക ഖുർആൻ പാരായണവും',
+            weeks: [
+              { week: 9, classes: 'Class 25 - 27', topicEn: 'Types of Madd, Heavy & Light Letters (Tafkheem/Tarqeeq)', topicMl: 'മദ്ദിന്റെ വിവിധ ഇനങ്ങളും റാഅ്, ലാം നിയമങ്ങളും', details: ['Madd Muttasil, Munfasil, Lazim & Arid durations', 'Rules of Lam in Lafz al-Jalalah (Allah) & Ra heavy/light rules'] },
+              { week: 10, classes: 'Class 28 - 30', topicEn: 'Waqf (Stopping Rules) & Juz Amma Recitation', topicMl: 'വഖ്ഫ് നിയമങ്ങളും ജുസ്അ് അമ്മ പാരായണവും', details: ['Waqf signs and end-of-ayah vowel changes', 'Surah Al-Fatihah & Surah An-Nas to Al-Fil'] },
+              { week: 11, classes: 'Class 31 - 33', topicEn: 'Short Surahs Tajweed Fluency Practice', topicMl: 'ചെറിയ സൂറത്തുകളുടെ തജ്‌വീദ് പരിശീലനം', details: ['Surah Al-Humazah to Surah Al-A’la recitation with applied Tajweed'] },
+              { week: 12, classes: 'Class 34 - 36', topicEn: 'Mushaf Sight Reading & Final Certification Exam', topicMl: 'മുസ്ഹഫ് വായനാ പരിശീലനവും ഫൈനൽ എക്സാമും', details: ['Sight-reading Surah Al-Baqarah opening pages with Tajweed', 'Class 36: Final Practical Recitation Assessment'] }
+            ]
+          }
+        ]
+      },
+      FIQH_BASICS: {
+        id: 'FIQH_BASICS',
+        titleEn: 'Fiqh, Namaz, Duas & Hadiths',
+        titleMl: 'പ്രാഥമിക ഫിഖ്ഹ്, നമസ്കാരം, ദുആകൾ & ഹദീസുകൾ',
+        duration: '3 Months (12 Weeks / 36 Classes)',
+        schedule: '3 Days / Week',
+        descEn: 'Essential Islamic jurisprudence covering Taharah (purification), complete Salah/Namaz rules, daily Masnoon Duas, and 10 character-building Hadiths.',
+        descMl: 'ശുദ്ധീകരണം (ത്വഹാറത്ത്), നമസ്കാര രീതികൾ, നിത്യജീവിതത്തിലെ ദുആകൾ, 10 ചെറിയ ഹദീസുകൾ എന്നിവ ഉൾക്കൊള്ളുന്ന കോഴ്സ്.',
+        months: [
+          {
+            month: 1,
+            titleEn: 'Month 1: Purification (Taharah) & Essential Daily Duas',
+            titleMl: 'മാസം 1: ശുദ്ധീകരണവും (ത്വഹാറത്ത്) നിത്യജീവിതത്തിലെ ദുആകളും',
+            weeks: [
+              { week: 1, classes: 'Class 1 - 3', topicEn: 'Pillars of Islam & Iman, Purification Fundamentals', topicMl: 'ഇസ്‌ലാമിക അടിസ്ഥാനങ്ങളും ശുദ്ധീകരണവും', details: ['5 Pillars of Islam & 6 Articles of Faith', 'Types of water and removing impurities (Najasah)', 'Dua & Hadith: Waking up/sleeping Duas & Hadith on cleanliness'] },
+              { week: 2, classes: 'Class 4 - 6', topicEn: 'Complete Wudu (Ablution) Rules & Practice', topicMl: 'വുളൂഅ് (അംഗസ്നാനം) പൂർണ്ണ പഠനം', details: ['Fard (obligatory) and Sunnah acts of Wudu, nullifiers of Wudu', 'Step-by-step practical Wudu demonstration', 'Dua & Hadith: Before/after Wudu Duas & Hadith on intention'] },
+              { week: 3, classes: 'Class 7 - 9', topicEn: 'Ghusl, Tayammum, Adhan & Iqamah', topicMl: 'കുളി (ഗുസ്ൽ), തയമ്മും, ബാങ്ക് & ഇഖാമത്ത്', details: ['Obligatory Ghusl steps & Tayammum conditions', 'Adhan & Iqamah wordings and responses', 'Duas: Post-Adhan Dua & Entering/Leaving Masjid Duas'] },
+              { week: 4, classes: 'Class 10 - 12', topicEn: 'Everyday Masnoon Duas & Month 1 Assessment', topicMl: 'നിത്യജീവിതത്തിലെ ദുആകളും ഒന്നാം മാസത്തെ വിലയിരുത്തലും', details: ['Eating, leaving/entering home, and travel Duas', 'Class 12: Monthly Fiqh & Dua Assessment 1'] }
+            ]
+          },
+          {
+            month: 2,
+            titleEn: 'Month 2: Rules & Practical Training of Salah (Namaz)',
+            titleMl: 'മാസം 2: നമസ്കാരത്തിന്റെ നിയമങ്ങളും പ്രായോഗിക പരിശീലനവും',
+            weeks: [
+              { week: 5, classes: 'Class 13 - 15', topicEn: 'Conditions (Shurut) & Timings of the 5 Daily Prayers', topicMl: 'നമസ്കാരത്തിന്റെ നിബന്ധനകളും സമയങ്ങളും', details: ['5 daily prayer names, timings, and Rakah counts', 'Prerequisites: Pure body/clothes/place, Awrah, Qiblah', 'Hadith on the importance of Salah'] },
+              { week: 6, classes: 'Class 16 - 18', topicEn: 'Pillars (Arkan) of Salah - Part 1', topicMl: 'നമസ്കാരത്തിന്റെ റുക്നുകൾ (ഫർളുകൾ) - ഭാഗം 1', details: ['Niyyah, Takbirat al-Ihram, Qiyam, and Surah Al-Fatihah', 'Adhkar: Opening Dua (Wajjahtu) & Ruku/Sujud Tasbeeh'] },
+              { week: 7, classes: 'Class 19 - 21', topicEn: 'Pillars of Salah - Part 2, Tashahhud & Durood', topicMl: 'നമസ്കാരത്തിന്റെ റുക്നുകൾ - ഭാഗം 2 & അത്തഹിയ്യാത്ത്', details: ['Ruku, I’tidal, Sujood, sitting between two Sujoods', 'Final Tashahhud (At-Tahiyyat), Durood Ibrahim, Dua before Salam & Salam'] },
+              { week: 8, classes: 'Class 22 - 24', topicEn: 'Sunnahs of Salah & Month 2 Practical Assessment', topicMl: 'നമസ്കാരത്തിലെ സുന്നത്തുകളും രണ്ടാം മാസത്തെ വിലയിരുത്തലും', details: ['Ab’ad & Hay’at Sunnahs, Qunoot in Fajr, nullifiers of Salah', 'Class 24: Monthly Practical Namaz Assessment 2'] }
+            ]
+          },
+          {
+            month: 3,
+            titleEn: 'Month 3: Special Prayers, Islamic Manners & 10 Hadiths',
+            titleMl: 'മാസം 3: പ്രത്യേക നമസ്കാരങ്ങൾ, സ്വഭാവ മര്യാദകൾ & ഹദീസ് പഠനം',
+            weeks: [
+              { week: 9, classes: 'Class 25 - 27', topicEn: 'Sujud Sahw (Prostration of Forgetfulness) & Jama’ah', topicMl: 'സഹ്‌വിന്റെ സുജൂദും ജമാഅത്ത് നമസ്കാരവും', details: ['How to perform Sujud Sahw for mistakes in prayer', 'Congregational prayer rules & joining late (Masbooq)', 'Post-Salah Adhkar & Duas'] },
+              { week: 10, classes: 'Class 28 - 30', topicEn: 'Jumu’ah, Sunnah Prayers & Fasting Basics', topicMl: 'ജുമുഅ, സുന്നത്ത് നമസ്കാരങ്ങൾ, നോമ്പ് (അടിസ്ഥാനം)', details: ['Jumu’ah etiquettes and rules, Rawatib, Witr & Duha prayers', 'Essential rules of Ramadan fasting'] },
+              { week: 11, classes: 'Class 31 - 33', topicEn: '10 Selected Hadiths & Islamic Akhlaq', topicMl: 'തിരഞ്ഞെടുത്ത 10 ഹദീസുകളും ഇസ്‌ലാമിക സ്വഭാവവും', details: ['Respecting parents, truthfulness, kindness to neighbors, patience & charity', 'Duas for parents, healing, and relief from hardship'] },
+              { week: 12, classes: 'Class 34 - 36', topicEn: 'Comprehensive Revision & Final Certification Exam', topicMl: 'റിവിഷനും ഫൈനൽ അസസ്മെന്റും', details: ['Complete review of Fiqh rulings, Duas, and 10 Hadiths', 'Class 36: Final Theory & Memorization Exam'] }
+            ]
+          }
+        ]
+      }
+    };
+
+    const INITIAL_STATE = {
+      founders: [
+        { id: 'fnd-1', name: 'Wadood', password: 'wadood123', role: 'FOUNDER' },
+        { id: 'fnd-2', name: 'Sahil', password: 'sahil123', role: 'FOUNDER' }
+      ],
+      academyLogo: '',
+      teachers: [
+        { id: 'tch-1', name: 'Usthad Abdul Rahman', password: 'usthad123', role: 'TEACHER', joinedDate: '2026-11-20' },
+        { id: 'tch-2', name: 'Usthada Fathima', password: 'usthada123', role: 'TEACHER', joinedDate: '2026-11-20' }
+      ],
+      students: [
+        {
+          id: 'std-1',
+          name: 'Ayman Kareem',
+          age: 9,
+          password: 'ayman123',
+          role: 'STUDENT',
+          courseId: 'QAIDA_RECITATION',
+          teacherId: 'tch-1',
+          parentId: 'par-1',
+          startDate: '2026-12-01',
+          completedWeeks: [1, 2, 3],
+          joinedDate: '2026-11-21'
+        },
+        {
+          id: 'std-2',
+          name: 'Mariyam Zoya',
+          age: 11,
+          password: 'mariyam123',
+          role: 'STUDENT',
+          courseId: 'FIQH_BASICS',
+          teacherId: 'tch-2',
+          parentId: 'par-2',
+          startDate: '2026-12-01',
+          completedWeeks: [1, 2],
+          joinedDate: '2026-11-21'
+        }
+      ],
+      parents: [
+        { id: 'par-1', name: 'Kareem P', password: 'kareem123', role: 'PARENT', studentId: 'std-1', joinedDate: '2026-11-21' },
+        { id: 'par-2', name: 'Najeeb K', password: 'najeeb123', role: 'PARENT', studentId: 'std-2', joinedDate: '2026-11-21' }
+      ],
+      studyLogs: [],
+      assessments: [],
+      examLinks: [],
+      liveClasses: [],
+      attemptedExams: {}
+    };
+
+    function App() {
+      const [darkMode, setDarkMode] = useState(true);
+      const [lang, setLang] = useState('en');
+      const t = UI_TEXT[lang];
+
+      const [dbState, setDbState] = useState(INITIAL_STATE);
+      const [isSyncing, setIsSyncing] = useState(false);
+
+      useEffect(() => {
+        const loadFromFirebase = async () => {
+          if (window.firebaseLoaded && window.db) {
+            try {
+              setIsSyncing(true);
+              const { doc, getDoc } = window.FirebaseFirestoreSDK;
+              const docRef = doc(window.db, "quran_tutor_portal", "main_state");
+              const snap = await getDoc(docRef);
+              if (snap.exists()) {
+                const data = snap.data();
+                setDbState((prev) => ({
+                  ...prev,
+                  founders: data.founders || prev.founders,
+                  academyLogo: data.academyLogo !== undefined ? data.academyLogo : prev.academyLogo,
+                  teachers: data.teachers || prev.teachers,
+                  students: data.students || prev.students,
+                  parents: data.parents || prev.parents,
+                  studyLogs: data.studyLogs || prev.studyLogs,
+                  assessments: data.assessments || prev.assessments,
+                  examLinks: data.examLinks || prev.examLinks,
+                  liveClasses: data.liveClasses || prev.liveClasses,
+                  attemptedExams: data.attemptedExams || prev.attemptedExams
+                }));
+              }
+            } catch (e) {
+              console.error("Firebase load error:", e);
+            } finally {
+              setIsSyncing(false);
+            }
+          }
+        };
+        const timer = setTimeout(loadFromFirebase, 600);
+        return () => clearTimeout(timer);
+      }, []);
+
+      const updateDb = async (partial) => {
+        const nextState = { ...dbState, ...partial };
+        setDbState(nextState);
+
+        if (window.firebaseLoaded && window.db) {
+          try {
+            setIsSyncing(true);
+            const { doc, setDoc } = window.FirebaseFirestoreSDK;
+            const docRef = doc(window.db, "quran_tutor_portal", "main_state");
+            await setDoc(docRef, nextState, { merge: true });
+          } catch (e) {
+            console.error("Firebase save error:", e);
+          } finally {
+            setIsSyncing(false);
+          }
+        }
+      };
+
+      const handleResetAllData = async () => {
+        setDbState(INITIAL_STATE);
+        if (window.firebaseLoaded && window.db) {
+          try {
+            const { doc, setDoc } = window.FirebaseFirestoreSDK;
+            const docRef = doc(window.db, "quran_tutor_portal", "main_state");
+            await setDoc(docRef, INITIAL_STATE);
+          } catch (e) {
+            console.error("Firebase reset error:", e);
+          }
+        }
+        showToast(lang === 'en' ? 'Portal data reset to defaults.' : 'ഡാറ്റ പുനഃക്രമീകരിച്ചു.');
+      };
+
+      const [currentUser, setCurrentUser] = useState(null);
+      const [loginRole, setLoginRole] = useState('STUDENT');
+      const [loginName, setLoginName] = useState('');
+      const [loginPassword, setLoginPassword] = useState('');
+      const [showPwd, setShowPwd] = useState(false);
+      const [notification, setNotification] = useState(null);
+
+      const showToast = (msg, type = 'success') => {
+        setNotification({ msg, type });
+        setTimeout(() => setNotification(null), 4000);
+      };
+
+      const handleLoginSubmit = (e) => {
+        e.preventDefault();
+        const cleanName = loginName.trim().toLowerCase();
+        const cleanPwd = loginPassword.trim();
+
+        if (!cleanName || !cleanPwd) {
+          showToast(lang === 'en' ? 'Please enter both Name and Password.' : 'ദയവായി പേരും പാസ്‌വേഡും നൽകുക.', 'error');
+          return;
+        }
+
+        if (loginRole === 'FOUNDER') {
+          const matchedFounder = dbState.founders.find(
+            (f) => f.name.trim().toLowerCase() === cleanName && f.password === cleanPwd
+          );
+          if (matchedFounder) {
+            setCurrentUser({ id: matchedFounder.id, name: matchedFounder.name, role: 'FOUNDER' });
+            setLoginName('');
+            setLoginPassword('');
+            showToast(lang === 'en' ? `Welcome back, ${matchedFounder.name}!` : `സ്വാഗതം, ${matchedFounder.name}!`);
+          } else {
+            showToast(lang === 'en' ? 'Invalid Founder Name or Password.' : 'തെറ്റായ ഫൗണ്ടർ പേര് അല്ലെങ്കിൽ പാസ്‌വേഡ്.', 'error');
+          }
+          return;
+        }
+
+        if (loginRole === 'STUDENT') {
+          const found = dbState.students.find((s) => s.name.trim().toLowerCase() === cleanName && s.password === cleanPwd);
+          if (found) {
+            setCurrentUser(found);
+            setLoginName('');
+            setLoginPassword('');
+            showToast(`${lang === 'en' ? 'Welcome' : 'സ്വാഗതം'}, ${found.name}!`);
+          } else {
+            showToast(lang === 'en' ? 'Invalid Student Name or Password.' : 'തെറ്റായ പേര് അല്ലെങ്കിൽ പാസ്‌വേഡ്.', 'error');
+          }
+          return;
+        }
+
+        if (loginRole === 'TEACHER') {
+          const found = dbState.teachers.find((tch) => tch.name.trim().toLowerCase() === cleanName && tch.password === cleanPwd);
+          if (found) {
+            setCurrentUser(found);
+            setLoginName('');
+            setLoginPassword('');
+            showToast(`${lang === 'en' ? 'Welcome' : 'സ്വാഗതം'}, ${found.name}!`);
+          } else {
+            showToast(lang === 'en' ? 'Invalid Teacher Name or Password.' : 'തെറ്റായ ടീച്ചർ പേര് അല്ലെങ്കിൽ പാസ്‌വേഡ്.', 'error');
+          }
+          return;
+        }
+
+        if (loginRole === 'PARENT') {
+          const found = dbState.parents.find((p) => p.name.trim().toLowerCase() === cleanName && p.password === cleanPwd);
+          if (found) {
+            setCurrentUser(found);
+            setLoginName('');
+            setLoginPassword('');
+            showToast(`${lang === 'en' ? 'Welcome' : 'സ്വാഗതം'}, ${found.name}!`);
+          } else {
+            showToast(lang === 'en' ? 'Invalid Parent Name or Password.' : 'തെറ്റായ പാരന്റ് പേര് അല്ലെങ്കിൽ പാസ്‌വേഡ്.', 'error');
+          }
+        }
+      };
+
+      const activeUser = useMemo(() => {
+        if (!currentUser) return null;
+        if (currentUser.role === 'FOUNDER') return dbState.founders.find((f) => f.id === currentUser.id) || currentUser;
+        if (currentUser.role === 'STUDENT') return dbState.students.find((s) => s.id === currentUser.id) || currentUser;
+        if (currentUser.role === 'TEACHER') return dbState.teachers.find((tch) => tch.id === currentUser.id) || currentUser;
+        if (currentUser.role === 'PARENT') return dbState.parents.find((p) => p.id === currentUser.id) || currentUser;
+        return currentUser;
+      }, [currentUser, dbState]);
+
+      const renderHeader = () => (
+        <header
+          className={`sticky top-0 z-30 border-b transition-colors no-print ${
+            darkMode
+              ? 'bg-slate-900/95 border-slate-800 text-slate-100 backdrop-blur-md'
+              : 'bg-emerald-950 border-emerald-900 text-white shadow-sm'
+          }`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {dbState.academyLogo ? (
+                <img
+                  src={dbState.academyLogo}
+                  alt="Quran Tutor Logo"
+                  className="w-10 h-10 rounded-xl object-cover border border-emerald-500/40 shadow-sm bg-white"
+                />
+              ) : (
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-inner ${
+                    darkMode
+                      ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-slate-950'
+                      : 'bg-gradient-to-br from-amber-400 to-amber-500 text-emerald-950'
+                  }`}
+                >
+                  <Icon name="book-open" className="w-6 h-6" />
+                </div>
+              )}
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className={`text-lg font-bold tracking-tight ${darkMode ? 'text-white' : 'text-amber-300'}`}>
+                    {t.brandName}
+                  </h1>
+                  <span
+                    className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                      darkMode
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        : 'bg-emerald-800 text-amber-200'
+                    }`}
+                  >
+                    <Icon name="cloud" className="w-3 h-3 text-emerald-400" />
+                    {isSyncing ? t.cloudSyncing : t.storageReady}
+                  </span>
+                  {activeUser && (
+                    <span
+                      className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                        darkMode
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          : 'bg-emerald-800 text-amber-200'
+                      }`}
+                    >
+                      {activeUser.name} ({activeUser.role})
+                    </span>
+                  )}
+                </div>
+                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-emerald-200'}`}>{t.brandTagline}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setLang((prev) => (prev === 'en' ? 'ml' : 'en'))}
+                className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition ${
+                  darkMode
+                    ? 'bg-slate-800 hover:bg-slate-700 text-emerald-300 border-slate-700'
+                    : 'bg-emerald-900 hover:bg-emerald-800 text-amber-200 border-emerald-700'
+                }`}
+              >
+                <Icon name="languages" className="w-4 h-4" />
+                <span>{t.langButton}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDarkMode((prev) => !prev)}
+                className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition ${
+                  darkMode
+                    ? 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-slate-700'
+                    : 'bg-emerald-900 hover:bg-emerald-800 text-white border-emerald-700'
+                }`}
+              >
+                <Icon name={darkMode ? 'sun' : 'moon'} className="w-4 h-4" />
+                <span className="hidden sm:inline">{darkMode ? t.lightMode : t.darkMode}</span>
+              </button>
+
+              {activeUser && (
+                <button
+                  type="button"
+                  onClick={() => setCurrentUser(null)}
+                  className="px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-red-600/90 hover:bg-red-600 text-white transition"
+                >
+                  <Icon name="log-out" className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t.logout}</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </header>
+      );
+
+      if (!activeUser) {
+        const roleOptions = [
+          { id: 'STUDENT', label: t.roleStudent, icon: 'graduation-cap' },
+          { id: 'PARENT', label: t.roleParent, icon: 'user-check' },
+          { id: 'TEACHER', label: t.roleTeacher, icon: 'users' },
+          { id: 'FOUNDER', label: t.roleFounder, icon: 'shield-check' }
+        ];
+
+        return (
+          <div
+            className={`min-h-screen flex flex-col transition-colors ${
+              darkMode ? 'bg-slate-950 text-slate-100' : 'bg-stone-50 text-slate-800'
+            }`}
+          >
+            {notification && (
+              <div
+                className={`fixed top-16 right-4 z-50 max-w-md px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 ${
+                  notification.type === 'error'
+                    ? 'bg-red-950/95 border-red-800 text-red-200'
+                    : 'bg-emerald-950/95 border-emerald-700 text-emerald-200'
+                }`}
+              >
+                <Icon name="alert-circle" className="w-5 h-5" />
+                <p className="text-xs sm:text-sm font-medium">{notification.msg}</p>
+              </div>
+            )}
+
+            {renderHeader()}
+
+            <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 lg:py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-6 space-y-6">
+                <div
+                  className={`rounded-2xl p-6 sm:p-8 border transition-colors ${
+                    darkMode ? 'bg-slate-900/90 border-slate-800 shadow-xl' : 'bg-white border-stone-200 shadow-sm'
+                  }`}
+                >
+                  <div
+                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 ${
+                      darkMode
+                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80'
+                        : 'bg-amber-100 text-amber-900'
+                    }`}
+                  >
+                    <Icon name="calendar" className="w-3.5 h-3.5" />
+                    {t.heroBadge}
+                  </div>
+
+                  <h2
+                    className={`text-2xl sm:text-3xl font-bold mb-3 leading-tight ${
+                      darkMode ? 'text-white' : 'text-emerald-950'
+                    }`}
+                  >
+                    {t.heroTitle}
+                  </h2>
+                  <p className={`text-sm leading-relaxed mb-6 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {t.heroDesc}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div
+                      className={`p-4 rounded-xl border ${
+                        darkMode ? 'bg-slate-950/70 border-emerald-900/60' : 'bg-emerald-50/70 border-emerald-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md mb-2 ${
+                          darkMode ? 'bg-emerald-950 text-emerald-300' : 'bg-emerald-100 text-emerald-800'
+                        }`}
+                      >
+                        {t.course1Badge}
+                      </span>
+                      <h3 className={`font-bold text-base mb-1 ${darkMode ? 'text-emerald-300' : 'text-emerald-950'}`}>
+                        {lang === 'en' ? COURSES.QAIDA_RECITATION.titleEn : COURSES.QAIDA_RECITATION.titleMl}
+                      </h3>
+                      <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {lang === 'en' ? COURSES.QAIDA_RECITATION.descEn : COURSES.QAIDA_RECITATION.descMl}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`p-4 rounded-xl border ${
+                        darkMode ? 'bg-slate-950/70 border-amber-900/50' : 'bg-amber-50/70 border-amber-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md mb-2 ${
+                          darkMode ? 'bg-amber-950 text-amber-300' : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {t.course2Badge}
+                      </span>
+                      <h3 className={`font-bold text-base mb-1 ${darkMode ? 'text-amber-300' : 'text-amber-950'}`}>
+                        {lang === 'en' ? COURSES.FIQH_BASICS.titleEn : COURSES.FIQH_BASICS.titleMl}
+                      </h3>
+                      <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {lang === 'en' ? COURSES.FIQH_BASICS.descEn : COURSES.FIQH_BASICS.descMl}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`lg:col-span-6 rounded-2xl border overflow-hidden transition-colors ${
+                  darkMode ? 'bg-slate-900 border-slate-800 shadow-2xl' : 'bg-white border-stone-200 shadow-lg'
+                }`}
+              >
+                <div
+                  className={`grid grid-cols-4 border-b text-xs font-bold ${
+                    darkMode ? 'bg-slate-950 border-slate-800' : 'bg-stone-100 border-stone-200'
+                  }`}
+                >
+                  {roleOptions.map((r) => {
+                    const isSelected = loginRole === r.id;
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => {
+                          setLoginRole(r.id);
+                          setLoginName('');
+                          setLoginPassword('');
+                        }}
+                        className={`py-3.5 px-2 flex flex-col sm:flex-row items-center justify-center gap-1.5 transition border-b-2 ${
+                          isSelected
+                            ? darkMode
+                              ? 'bg-slate-900 text-emerald-400 border-emerald-400'
+                              : 'bg-white text-emerald-900 border-emerald-700'
+                            : darkMode
+                            ? 'text-slate-400 hover:text-slate-200 border-transparent'
+                            : 'text-slate-500 hover:text-slate-800 border-transparent'
+                        }`}
+                      >
+                        <Icon name={r.icon} className="w-4 h-4" />
+                        <span className="truncate">{r.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <form onSubmit={handleLoginSubmit} className="p-6 sm:p-8 space-y-5">
+                  <div>
+                    <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                      {t.portalAccess} — {roleOptions.find((r) => r.id === loginRole)?.label}
+                    </h3>
+                    <p className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {t.portalSubtitle}
+                    </p>
+                  </div>
+
+                  {loginRole === 'FOUNDER' && (
+                    <div
+                      className={`p-3.5 rounded-xl border text-xs ${
+                        darkMode
+                          ? 'bg-emerald-950/40 border-emerald-800/70 text-emerald-200'
+                          : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      }`}
+                    >
+                      <div className="font-bold flex items-center gap-1.5 mb-0.5">
+                        <Icon name="lock" className="w-3.5 h-3.5" /> {t.founderBannerTitle}
+                      </div>
+                      <p className="opacity-90">{t.founderBannerDesc}</p>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className={`block text-xs font-semibold mb-1.5 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                      {t.nameLabel}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      autoComplete="off"
+                      value={loginName}
+                      onChange={(e) => setLoginName(e.target.value)}
+                      placeholder={t.namePlaceholder}
+                      className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition ${
+                        darkMode
+                          ? 'bg-slate-950 border-slate-700 text-white focus:border-emerald-400'
+                          : 'bg-white border-stone-300 text-slate-900 focus:border-emerald-700'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-xs font-semibold mb-1.5 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                      {t.passwordLabel}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPwd ? 'text' : 'password'}
+                        required
+                        autoComplete="off"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        placeholder={t.passwordPlaceholder}
+                        className={`w-full pl-4 pr-11 py-3 rounded-xl border text-sm outline-none transition ${
+                          darkMode
+                            ? 'bg-slate-950 border-slate-700 text-white focus:border-emerald-400'
+                            : 'bg-white border-stone-300 text-slate-900 focus:border-emerald-700'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd((prev) => !prev)}
+                        className={`absolute inset-y-0 right-0 px-3.5 flex items-center transition ${
+                          darkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-400 hover:text-slate-700'
+                        }`}
+                      >
+                        <Icon name={showPwd ? 'eye-off' : 'eye'} className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className={`w-full py-3.5 rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2 ${
+                      darkMode
+                        ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                        : 'bg-emerald-900 hover:bg-emerald-950 text-amber-300'
+                    }`}
+                  >
+                    <Icon name="key-round" className="w-4 h-4" />
+                    {t.signInBtn}
+                  </button>
+                </form>
+              </div>
+            </main>
+          </div>
+        );
+      }
+
+      return (
+        <div
+          className={`min-h-screen flex flex-col transition-colors ${
+            darkMode ? 'bg-slate-950 text-slate-100' : 'bg-stone-50 text-slate-800'
+          }`}
+        >
+          {notification && (
+            <div
+              className={`fixed top-16 right-4 z-50 max-w-md px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 no-print ${
+                notification.type === 'error'
+                  ? 'bg-red-950/95 border-red-800 text-red-200'
+                  : 'bg-emerald-950/95 border-emerald-700 text-emerald-200'
+              }`}
+            >
+              <Icon name="check-circle-2" className="w-5 h-5" />
+              <p className="text-xs sm:text-sm font-medium">{notification.msg}</p>
+            </div>
+          )}
+
+          {renderHeader()}
+
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+            {activeUser.role === 'FOUNDER' && (
+              <FounderDashboard
+                darkMode={darkMode}
+                lang={lang}
+                t={t}
+                currentFounder={activeUser}
+                dbState={dbState}
+                updateDb={updateDb}
+                handleResetAllData={handleResetAllData}
+                showToast={showToast}
+              />
+            )}
+
+            {activeUser.role === 'TEACHER' && (
+              <TeacherDashboard
+                darkMode={darkMode}
+                lang={lang}
+                t={t}
+                teacher={activeUser}
+                dbState={dbState}
+                updateDb={updateDb}
+                showToast={showToast}
+              />
+            )}
+
+            {activeUser.role === 'STUDENT' && (
+              <StudentDashboard
+                darkMode={darkMode}
+                lang={lang}
+                t={t}
+                student={activeUser}
+                dbState={dbState}
+                updateDb={updateDb}
+                showToast={showToast}
+              />
+            )}
+
+            {activeUser.role === 'PARENT' && (
+              <ParentDashboard
+                darkMode={darkMode}
+                lang={lang}
+                t={t}
+                parent={activeUser}
+                dbState={dbState}
+                updateDb={updateDb}
+                showToast={showToast}
+              />
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    // =========================================================================
+    // 6. FOUNDER DASHBOARD
+    // =========================================================================
+    function FounderDashboard({ darkMode, lang, t, currentFounder, dbState, updateDb, handleResetAllData, showToast }) {
+      const { founders, teachers, students, parents, studyLogs, assessments, examLinks, academyLogo } = dbState;
+      const [activeTab, setActiveTab] = useState('REGISTER');
+
+      const [regForm, setRegForm] = useState({
+        studentName: '',
+        studentAge: '',
+        studentPassword: '',
+        courseId: 'QAIDA_RECITATION',
+        teacherId: teachers[0]?.id || '',
+        startDate: '2026-12-01',
+        parentName: '',
+        parentPassword: ''
+      });
+      const [teacherForm, setTeacherForm] = useState({ name: '', password: '' });
+      const [copiedId, setCopiedId] = useState(null);
+
+      const [editingStudentId, setEditingStudentId] = useState(null);
+      const [studentEditDraft, setStudentEditDraft] = useState(null);
+      const [editingTeacherId, setEditingTeacherId] = useState(null);
+      const [teacherEditDraft, setTeacherEditDraft] = useState(null);
+      const [editingReportId, setEditingReportId] = useState(null);
+      const [editDraft, setEditDraft] = useState(null);
+
+      const [selectedFounderId, setSelectedFounderId] = useState(currentFounder?.id || 'fnd-1');
+      const [editFounderName, setEditFounderName] = useState(
+        founders.find((f) => f.id === (currentFounder?.id || 'fnd-1'))?.name || ''
+      );
+      const [newFounderPwd, setNewFounderPwd] = useState('');
+
+      const pendingReports = assessments.filter((a) => a.status === 'PENDING_REVIEW');
+      const approvedReports = assessments.filter((a) => a.status === 'APPROVED');
+
+      const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-stone-200 text-slate-800 shadow-sm';
+      const inputClass = darkMode ? 'bg-slate-950 border-slate-700 text-white focus:border-emerald-400' : 'bg-white border-stone-300 text-slate-900 focus:border-emerald-700';
+
+      const handleRegisterStudentAndParent = (e) => {
+        e.preventDefault();
+        if (!regForm.studentName.trim() || !regForm.studentPassword.trim() || !regForm.parentName.trim() || !regForm.parentPassword.trim()) {
+          showToast('Please fill all student and parent fields.', 'error');
+          return;
+        }
+        const studentId = `std-${Date.now()}`;
+        const parentId = `par-${Date.now() + 1}`;
+        const newStudent = {
+          id: studentId,
+          name: regForm.studentName.trim(),
+          age: Number(regForm.studentAge) || 8,
+          password: regForm.studentPassword.trim(),
+          role: 'STUDENT',
+          courseId: regForm.courseId,
+          teacherId: regForm.teacherId || teachers[0]?.id,
+          startDate: regForm.startDate || '2026-12-01',
+          parentId,
+          completedWeeks: [],
+          joinedDate: new Date().toISOString().split('T')[0]
+        };
+        const newParent = {
+          id: parentId,
+          name: regForm.parentName.trim(),
+          password: regForm.parentPassword.trim(),
+          role: 'PARENT',
+          studentId,
+          joinedDate: new Date().toISOString().split('T')[0]
+        };
+        updateDb({ students: [newStudent, ...students], parents: [newParent, ...parents] });
+        setRegForm({
+          studentName: '',
+          studentAge: '',
+          studentPassword: '',
+          courseId: 'QAIDA_RECITATION',
+          teacherId: teachers[0]?.id || '',
+          startDate: '2026-12-01',
+          parentName: '',
+          parentPassword: ''
+        });
+        showToast(lang === 'en' ? 'Student & Parent accounts created!' : 'വിദ്യാർത്ഥിയുടെയും രക്ഷിതാവിന്റെയും അക്കൗണ്ട് സൃഷ്ടിച്ചു!');
+      };
+
+      const handleRegisterTeacher = (e) => {
+        e.preventDefault();
+        if (!teacherForm.name.trim() || !teacherForm.password.trim()) return;
+        const newTeacher = {
+          id: `tch-${Date.now()}`,
+          name: teacherForm.name.trim(),
+          password: teacherForm.password.trim(),
+          role: 'TEACHER',
+          joinedDate: new Date().toISOString().split('T')[0]
+        };
+        updateDb({ teachers: [newTeacher, ...teachers] });
+        setTeacherForm({ name: '', password: '' });
+        showToast(lang === 'en' ? 'New Teacher registered!' : 'പുതിയ ടീച്ചറെ രജിസ്റ്റർ ചെയ്തു!');
+      };
+
+      const handleCopyCredentials = (id, text) => {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        setCopiedId(id);
+        showToast(lang === 'en' ? 'Credentials copied!' : 'ലോഗിൻ വിവരങ്ങൾ കോപ്പി ചെയ്തു!');
+        setTimeout(() => setCopiedId(null), 2500);
+      };
+
+      const startEditStudentAndParent = (st, par) => {
+        setEditingStudentId(st.id);
+        setStudentEditDraft({
+          studentName: st.name,
+          studentAge: st.age,
+          studentPassword: st.password,
+          courseId: st.courseId,
+          teacherId: st.teacherId,
+          startDate: st.startDate || '2026-12-01',
+          parentId: par?.id || '',
+          parentName: par?.name || '',
+          parentPassword: par?.password || ''
+        });
+      };
+
+      const handleSaveStudentAndParentEdit = (studentId) => {
+        if (!studentEditDraft.studentName.trim() || !studentEditDraft.studentPassword.trim()) return;
+        const updatedStudents = students.map((s) =>
+          s.id === studentId
+            ? {
+                ...s,
+                name: studentEditDraft.studentName.trim(),
+                age: Number(studentEditDraft.studentAge) || s.age,
+                password: studentEditDraft.studentPassword.trim(),
+                courseId: studentEditDraft.courseId,
+                teacherId: studentEditDraft.teacherId,
+                startDate: studentEditDraft.startDate
+              }
+            : s
+        );
+        const updatedParents = parents.map((p) =>
+          p.id === studentEditDraft.parentId
+            ? {
+                ...p,
+                name: studentEditDraft.parentName.trim() || p.name,
+                password: studentEditDraft.parentPassword.trim() || p.password
+              }
+            : p
+        );
+        updateDb({ students: updatedStudents, parents: updatedParents });
+        setEditingStudentId(null);
+        setStudentEditDraft(null);
+        showToast('Student & Parent updated!');
+      };
+
+      const handleDeleteStudentAndParent = (st) => {
+        updateDb({
+          students: students.filter((s) => s.id !== st.id),
+          parents: parents.filter((p) => p.id !== st.parentId && p.studentId !== st.id)
+        });
+        showToast('Student & linked Parent removed.');
+      };
+
+      const startEditTeacher = (tch) => {
+        setEditingTeacherId(tch.id);
+        setTeacherEditDraft({ name: tch.name, password: tch.password });
+      };
+
+      const handleSaveTeacherEdit = (teacherId) => {
+        if (!teacherEditDraft.name.trim() || !teacherEditDraft.password.trim()) return;
+        updateDb({
+          teachers: teachers.map((tch) =>
+            tch.id === teacherId ? { ...tch, name: teacherEditDraft.name.trim(), password: teacherEditDraft.password.trim() } : tch
+          )
+        });
+        setEditingTeacherId(null);
+        setTeacherEditDraft(null);
+        showToast('Teacher updated!');
+      };
+
+      const handleDeleteTeacher = (teacherId) => {
+        updateDb({ teachers: teachers.filter((tch) => tch.id !== teacherId) });
+        showToast('Teacher removed.');
+      };
+
+      const startEditReport = (rep) => {
+        setEditingReportId(rep.id);
+        setEditDraft({
+          masteryScore: rep.masteryScore,
+          attendanceScore: rep.attendanceScore,
+          hifzDuaScore: rep.hifzDuaScore,
+          grade: rep.grade,
+          teacherRemark: rep.teacherRemark,
+          founderNote: rep.founderNote || ''
+        });
+      };
+
+      const handleSaveReportEdit = (reportId, publishNow) => {
+        const avg = Math.round(
+          (Number(editDraft.masteryScore) + Number(editDraft.attendanceScore) + Number(editDraft.hifzDuaScore)) / 3
+        );
+        updateDb({
+          assessments: assessments.map((r) =>
+            r.id === reportId
+              ? {
+                  ...r,
+                  masteryScore: Number(editDraft.masteryScore),
+                  attendanceScore: Number(editDraft.attendanceScore),
+                  hifzDuaScore: Number(editDraft.hifzDuaScore),
+                  score: avg,
+                  grade: editDraft.grade,
+                  teacherRemark: editDraft.teacherRemark,
+                  founderNote: editDraft.founderNote,
+                  editedByFounder: true,
+                  status: publishNow ? 'APPROVED' : r.status
+                }
+              : r
+          )
+        });
+        setEditingReportId(null);
+        setEditDraft(null);
+        showToast(publishNow ? 'Report updated & published to Parent!' : 'Report edits saved.');
+      };
+
+      const handleApprovePublish = (reportId) => {
+        updateDb({
+          assessments: assessments.map((r) => (r.id === reportId ? { ...r, status: 'APPROVED' } : r))
+        });
+        showToast('Weekly Progress Report approved & published!');
+      };
+
+      const handleLogoFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          updateDb({ academyLogo: reader.result });
+          showToast('Academy logo updated!');
+        };
+        reader.readAsDataURL(file);
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 no-print">
+            <div className={`p-4 rounded-2xl border ${cardClass}`}>
+              <p className="text-xs opacity-70">{t.roleStudent}s</p>
+              <p className="text-2xl font-bold text-emerald-400 mt-1">{students.length}</p>
+            </div>
+            <div className={`p-4 rounded-2xl border ${cardClass}`}>
+              <p className="text-xs opacity-70">{t.roleTeacher}s</p>
+              <p className="text-2xl font-bold text-amber-400 mt-1">{teachers.length}</p>
+            </div>
+            <div className={`p-4 rounded-2xl border ${cardClass}`}>
+              <p className="text-xs opacity-70">{t.pendingReviewBadge}</p>
+              <p className="text-2xl font-bold text-indigo-400 mt-1">{pendingReports.length}</p>
+            </div>
+            <div className={`p-4 rounded-2xl border ${cardClass}`}>
+              <p className="text-xs opacity-70">{t.homeStudyHoursStat}</p>
+              <p className="text-2xl font-bold text-teal-400 mt-1">
+                {studyLogs.reduce((sum, l) => sum + Number(l.hours), 0)} hrs
+              </p>
+            </div>
+          </div>
+
+          <div className={`flex flex-wrap gap-2 p-2 rounded-2xl border no-print ${cardClass}`}>
+            {[
+              { id: 'REGISTER', label: t.tabRegister, icon: 'user-plus' },
+              { id: 'REVIEW_REPORTS', label: `${t.tabReviewReports} (${pendingReports.length})`, icon: 'edit-3' },
+              { id: 'EXAMS', label: `${t.tabExams} (${examLinks.length})`, icon: 'link-2' },
+              { id: 'PUBLISHED', label: t.tabPublished, icon: 'file-text' },
+              { id: 'CURRICULUM', label: t.tabCurriculum, icon: 'book-marked' },
+              { id: 'SETTINGS', label: t.tabSettings, icon: 'key-round' }
+            ].map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+                    active
+                      ? darkMode
+                        ? 'bg-emerald-500 text-slate-950'
+                        : 'bg-emerald-900 text-white'
+                      : darkMode
+                      ? 'text-slate-300 hover:bg-slate-800'
+                      : 'text-slate-600 hover:bg-stone-100'
+                  }`}
+                >
+                  <Icon name={tab.icon} className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {activeTab === 'REGISTER' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-6 space-y-6">
+                <div className={`p-6 rounded-2xl border ${cardClass}`}>
+                  <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
+                    <Icon name="user-plus" className="w-5 h-5 text-emerald-400" />
+                    {t.regStudentParentTitle}
+                  </h2>
+                  <p className="text-xs opacity-70 mb-4">{t.regStudentParentSub}</p>
+
+                  <form onSubmit={handleRegisterStudentAndParent} className="space-y-3.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-semibold mb-1">{t.studentName}</label>
+                        <input
+                          type="text"
+                          required
+                          value={regForm.studentName}
+                          onChange={(e) => setRegForm({ ...regForm, studentName: e.target.value })}
+                          placeholder="e.g. Zaidan Ali"
+                          className={`w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm outline-none ${inputClass}`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold mb-1">{t.studentAge}</label>
+                        <input
+                          type="number"
+                          min="4"
+                          max="80"
+                          required
+                          value={regForm.studentAge}
+                          onChange={(e) => setRegForm({ ...regForm, studentAge: e.target.value })}
+                          placeholder="10"
+                          className={`w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm outline-none ${inputClass}`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold mb-1">{t.studentPassword}</label>
+                      <input
+                        type="text"
+                        required
+                        value={regForm.studentPassword}
+                        onChange={(e) => setRegForm({ ...regForm, studentPassword: e.target.value })}
+                        placeholder="Create password for student"
+                        className={`w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm outline-none ${inputClass}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold mb-1">{t.courseStartDate}</label>
+                      <input
+                        type="date"
+                        required
+                        value={regForm.startDate}
+                        onChange={(e) => setRegForm({ ...regForm, startDate: e.target.value })}
+                        className={`w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm outline-none ${inputClass}`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold mb-1">{t.selectCourse}</label>
+                        <select
+                          value={regForm.courseId}
+                          onChange={(e) => setRegForm({ ...regForm, courseId: e.target.value })}
+                          className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold outline-none ${inputClass}`}
+                        >
+                          <option value="QAIDA_RECITATION">Course 1: Qaida & Recitation</option>
+                          <option value="FIQH_BASICS">Course 2: Fiqh, Namaz & Duas</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold mb-1">{t.assignTeacher}</label>
+                        <select
+                          value={regForm.teacherId}
+                          onChange={(e) => setRegForm({ ...regForm, teacherId: e.target.value })}
+                          className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold outline-none ${inputClass}`}
+                        >
+                          {teachers.map((tch) => (
+                            <option key={tch.id} value={tch.id}>
+                              {tch.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={`pt-3 border-t grid grid-cols-1 sm:grid-cols-2 gap-3 ${darkMode ? 'border-slate-800' : 'border-stone-200'}`}>
+                      <div>
+                        <label className="block text-xs font-semibold mb-1">{t.parentName}</label>
+                        <input
+                          type="text"
+                          required
+                          value={regForm.parentName}
+                          onChange={(e) => setRegForm({ ...regForm, parentName: e.target.value })}
+                          placeholder="e.g. Hassan Ali"
+                          className={`w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm outline-none ${inputClass}`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold mb-1">{t.parentPassword}</label>
+                        <input
+                          type="text"
+                          required
+                          value={regForm.parentPassword}
+                          onChange={(e) => setRegForm({ ...regForm, parentPassword: e.target.value })}
+                          placeholder="Create password for parent"
+                          className={`w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm outline-none ${inputClass}`}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className={`w-full py-3 rounded-xl font-bold text-xs sm:text-sm transition ${
+                        darkMode
+                          ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                          : 'bg-emerald-900 hover:bg-emerald-950 text-white'
+                      }`}
+                    >
+                      {t.createStudentParentBtn}
+                    </button>
+                  </form>
+                </div>
+
+                <div className={`p-6 rounded-2xl border ${cardClass}`}>
+                  <h3 className="text-base font-bold mb-3">{t.regTeacherTitle}</h3>
+                  <form onSubmit={handleRegisterTeacher} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input
+                      type="text"
+                      required
+                      value={teacherForm.name}
+                      onChange={(e) => setTeacherForm({ ...teacherForm, name: e.target.value })}
+                      placeholder={t.teacherName}
+                      className={`px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                    />
+                    <input
+                      type="text"
+                      required
+                      value={teacherForm.password}
+                      onChange={(e) => setTeacherForm({ ...teacherForm, password: e.target.value })}
+                      placeholder={t.teacherPassword}
+                      className={`px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                    />
+                    <button
+                      type="submit"
+                      className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition"
+                    >
+                      {t.createTeacherBtn}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div className={`lg:col-span-6 p-6 rounded-2xl border space-y-5 ${cardClass}`}>
+                <div>
+                  <h3 className="text-lg font-bold">{t.credentialsDirTitle}</h3>
+                  <p className="text-xs opacity-70">{t.credentialsDirSub}</p>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-xs font-bold uppercase tracking-wider opacity-70">
+                    Students & Linked Parents ({students.length})
+                  </p>
+                  {students.map((st) => {
+                    const par = parents.find((p) => p.id === st.parentId);
+                    const tch = teachers.find((x) => x.id === st.teacherId);
+                    const isEditingSt = editingStudentId === st.id;
+                    const sharePayload =
+                      `Quran Tutor Login Details:\nStudent Name: ${st.name}\nStudent Password: ${st.password}\n` +
+                      `Course: ${COURSES[st.courseId]?.titleEn}\nTeacher: ${tch?.name || '-'}\n` +
+                      (par ? `Parent Name: ${par.name}\nParent Password: ${par.password}` : '');
+
+                    return (
+                      <div
+                        key={st.id}
+                        className={`p-4 rounded-xl border text-xs space-y-2 ${
+                          darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-stone-50 border-stone-200'
+                        }`}
+                      >
+                        {isEditingSt && studentEditDraft ? (
+                          <div className="space-y-2.5">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <input
+                                type="text"
+                                value={studentEditDraft.studentName}
+                                onChange={(e) => setStudentEditDraft({ ...studentEditDraft, studentName: e.target.value })}
+                                className={`px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                              />
+                              <input
+                                type="number"
+                                value={studentEditDraft.studentAge}
+                                onChange={(e) => setStudentEditDraft({ ...studentEditDraft, studentAge: e.target.value })}
+                                className={`px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                              />
+                              <input
+                                type="text"
+                                value={studentEditDraft.studentPassword}
+                                onChange={(e) => setStudentEditDraft({ ...studentEditDraft, studentPassword: e.target.value })}
+                                className={`px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                              />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <select
+                                value={studentEditDraft.courseId}
+                                onChange={(e) => setStudentEditDraft({ ...studentEditDraft, courseId: e.target.value })}
+                                className={`px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                              >
+                                <option value="QAIDA_RECITATION">Course 1: Qaida & Recitation</option>
+                                <option value="FIQH_BASICS">Course 2: Fiqh, Namaz & Duas</option>
+                              </select>
+                              <select
+                                value={studentEditDraft.teacherId}
+                                onChange={(e) => setStudentEditDraft({ ...studentEditDraft, teacherId: e.target.value })}
+                                className={`px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                              >
+                                {teachers.map((item) => (
+                                  <option key={item.id} value={item.id}>
+                                    {item.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] opacity-70 mb-1">Start Date</label>
+                              <input
+                                type="date"
+                                value={studentEditDraft.startDate}
+                                onChange={(e) => setStudentEditDraft({ ...studentEditDraft, startDate: e.target.value })}
+                                className={`w-full px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                              />
+                            </div>
+                            {par && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  value={studentEditDraft.parentName}
+                                  onChange={(e) => setStudentEditDraft({ ...studentEditDraft, parentName: e.target.value })}
+                                  className={`px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                                />
+                                <input
+                                  type="text"
+                                  value={studentEditDraft.parentPassword}
+                                  onChange={(e) => setStudentEditDraft({ ...studentEditDraft, parentPassword: e.target.value })}
+                                  className={`px-2.5 py-2 rounded-lg border text-xs ${inputClass}`}
+                                />
+                              </div>
+                            )}
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingStudentId(null);
+                                  setStudentEditDraft(null);
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-slate-700 text-white font-semibold"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveStudentAndParentEdit(st.id)}
+                                className="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <span className="font-bold text-sm">{st.name}</span>{' '}
+                                <span className="opacity-70">(Age: {st.age})</span>
+                                <div className="text-[11px] text-emerald-400 font-semibold">
+                                  {COURSES[st.courseId]?.titleEn} • Teacher: {tch?.name || 'Unassigned'} • Start: {st.startDate || '2026-12-01'}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => startEditStudentAndParent(st, par)}
+                                  className={`p-1.5 rounded-lg border transition ${
+                                    darkMode
+                                      ? 'bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-700'
+                                      : 'bg-white border-stone-300 text-amber-700 hover:bg-stone-100'
+                                  }`}
+                                >
+                                  <Icon name="edit-3" className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteStudentAndParent(st)}
+                                  className="p-1.5 rounded-lg bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 transition"
+                                >
+                                  <Icon name="trash-2" className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyCredentials(st.id, sharePayload)}
+                                  className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition ${
+                                    darkMode
+                                      ? 'bg-slate-800 hover:bg-slate-700 text-emerald-300'
+                                      : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900'
+                                  }`}
+                                >
+                                  <Icon name="copy" className="w-3.5 h-3.5" />
+                                  {copiedId === st.id ? t.copied : t.copyCreds}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                              <div className={`p-2 rounded-lg border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-stone-200'}`}>
+                                <span className="opacity-60 block text-[10px]">STUDENT LOGIN</span>
+                                <span className="font-mono font-bold">{st.name}</span> /{' '}
+                                <span className="font-mono text-amber-400">{st.password}</span>
+                              </div>
+                              {par && (
+                                <div className={`p-2 rounded-lg border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-stone-200'}`}>
+                                  <span className="opacity-60 block text-[10px]">PARENT LOGIN</span>
+                                  <span className="font-mono font-bold">{par.name}</span> /{' '}
+                                  <span className="font-mono text-amber-400">{par.password}</span>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <p className="text-xs font-bold uppercase tracking-wider opacity-70">Teachers ({teachers.length})</p>
+                  {teachers.map((tch) => {
+                    const isEditingTch = editingTeacherId === tch.id;
+                    return (
+                      <div
+                        key={tch.id}
+                        className={`p-3 rounded-xl border text-xs ${
+                          darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-stone-50 border-stone-200'
+                        }`}
+                      >
+                        {isEditingTch && teacherEditDraft ? (
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <input
+                              type="text"
+                              value={teacherEditDraft.name}
+                              onChange={(e) => setTeacherEditDraft({ ...teacherEditDraft, name: e.target.value })}
+                              className={`flex-1 px-2.5 py-1.5 rounded-lg border text-xs ${inputClass}`}
+                            />
+                            <input
+                              type="text"
+                              value={teacherEditDraft.password}
+                              onChange={(e) => setTeacherEditDraft({ ...teacherEditDraft, password: e.target.value })}
+                              className={`flex-1 px-2.5 py-1.5 rounded-lg border text-xs ${inputClass}`}
+                            />
+                            <div className="flex gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingTeacherId(null);
+                                  setTeacherEditDraft(null);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-slate-700 text-white font-semibold"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveTeacherEdit(tch.id)}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <span className="font-bold">{tch.name}</span> • Password:{' '}
+                              <span className="font-mono text-amber-400">{tch.password}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => startEditTeacher(tch)}
+                                className={`p-1.5 rounded-lg border transition ${
+                                  darkMode
+                                    ? 'bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-700'
+                                    : 'bg-white border-stone-300 text-amber-700 hover:bg-stone-100'
+                                }`}
+                              >
+                                <Icon name="edit-3" className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteTeacher(tch.id)}
+                                className="p-1.5 rounded-lg bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 transition"
+                              >
+                                <Icon name="trash-2" className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCopyCredentials(
+                                    tch.id,
+                                    `Quran Tutor Teacher Login:\nName: ${tch.name}\nPassword: ${tch.password}`
+                                  )
+                                }
+                                className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 ${
+                                  darkMode ? 'bg-slate-800 text-slate-200' : 'bg-stone-200 text-slate-800'
+                                }`}
+                              >
+                                <Icon name="copy" className="w-3 h-3" />
+                                {copiedId === tch.id ? t.copied : t.copyCreds}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'REVIEW_REPORTS' && (
+            <div className={`p-6 rounded-2xl border space-y-4 ${cardClass}`}>
+              <h2 className="text-lg font-bold">{t.tabReviewReports}</h2>
+              <div className="space-y-4">
+                {assessments.map((rep) => {
+                  const st = students.find((s) => s.id === rep.studentId);
+                  const isEditing = editingReportId === rep.id;
+                  const isPending = rep.status === 'PENDING_REVIEW';
+                  return (
+                    <div
+                      key={rep.id}
+                      className={`p-5 rounded-2xl border ${
+                        darkMode
+                          ? isPending
+                            ? 'bg-indigo-950/30 border-indigo-800/70'
+                            : 'bg-slate-950/60 border-slate-800'
+                          : isPending
+                          ? 'bg-indigo-50/50 border-indigo-200'
+                          : 'bg-stone-50 border-stone-200'
+                      }`}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                        <div>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                              isPending
+                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                                : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                            }`}
+                          >
+                            {isPending ? t.pendingReviewBadge : t.publishedBadge}
+                          </span>
+                          <h3 className="font-bold text-base mt-1">
+                            {st?.name || 'Student'} ({COURSES[st?.courseId]?.titleEn})
+                          </h3>
+                          <p className="text-xs opacity-70">
+                            Week {rep.week} • Submitted by: {rep.evaluatorName}
+                          </p>
+                        </div>
+
+                        {!isEditing && (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <button
+                              onClick={() => startEditReport(rep)}
+                              className={`px-3.5 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
+                                darkMode ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-stone-300 text-slate-800'
+                              }`}
+                            >
+                              <Icon name="edit-3" className="w-3.5 h-3.5" /> {t.editOverrideBtn}
+                            </button>
+                            {isPending && (
+                              <button
+                                onClick={() => handleApprovePublish(rep.id)}
+                                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5"
+                              >
+                                <Icon name="send" className="w-3.5 h-3.5" /> {t.approvePublishBtn}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {isEditing && editDraft ? (
+                        <div className={`p-4 rounded-xl border space-y-3 ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-indigo-200'}`}>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                              <label className="block text-[11px] font-semibold mb-1">{t.masteryScore}</label>
+                              <input
+                                type="number"
+                                value={editDraft.masteryScore}
+                                onChange={(e) => setEditDraft({ ...editDraft, masteryScore: e.target.value })}
+                                className={`w-full px-2.5 py-1.5 rounded-lg border text-xs ${inputClass}`}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-semibold mb-1">{t.attendanceScore}</label>
+                              <input
+                                type="number"
+                                value={editDraft.attendanceScore}
+                                onChange={(e) => setEditDraft({ ...editDraft, attendanceScore: e.target.value })}
+                                className={`w-full px-2.5 py-1.5 rounded-lg border text-xs ${inputClass}`}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-semibold mb-1">{t.hifzDuaScore}</label>
+                              <input
+                                type="number"
+                                value={editDraft.hifzDuaScore}
+                                onChange={(e) => setEditDraft({ ...editDraft, hifzDuaScore: e.target.value })}
+                                className={`w-full px-2.5 py-1.5 rounded-lg border text-xs ${inputClass}`}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-semibold mb-1">{t.overallGrade}</label>
+                              <select
+                                value={editDraft.grade}
+                                onChange={(e) => setEditDraft({ ...editDraft, grade: e.target.value })}
+                                className={`w-full px-2.5 py-1.5 rounded-lg border text-xs ${inputClass}`}
+                              >
+                                <option value="A+">A+</option>
+                                <option value="A">A</option>
+                                <option value="B+">B+</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                              </select>
+                            </div>
+                          </div>
+                          <textarea
+                            rows="2"
+                            value={editDraft.teacherRemark}
+                            onChange={(e) => setEditDraft({ ...editDraft, teacherRemark: e.target.value })}
+                            className={`w-full px-3 py-2 rounded-lg border text-xs ${inputClass}`}
+                          />
+                          <textarea
+                            rows="2"
+                            value={editDraft.founderNote}
+                            onChange={(e) => setEditDraft({ ...editDraft, founderNote: e.target.value })}
+                            placeholder="Optional Founder note..."
+                            className={`w-full px-3 py-2 rounded-lg border text-xs ${inputClass}`}
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingReportId(null);
+                                setEditDraft(null);
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-slate-700 text-white text-xs font-semibold"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleSaveReportEdit(rep.id, true)}
+                              className="px-4 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold"
+                            >
+                              Save & Publish
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs space-y-1">
+                          <p>
+                            <strong>Score:</strong> {rep.score}% ({rep.grade}) • <strong>Teacher:</strong> {rep.teacherRemark}
+                          </p>
+                          {rep.founderNote && <p className="text-emerald-400"><strong>Founder:</strong> {rep.founderNote}</p>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'EXAMS' && (
+            <ExamLinksManager darkMode={darkMode} t={t} examLinks={examLinks} updateDb={updateDb} postedBy="Founder" showToast={showToast} />
+          )}
+
+          {activeTab === 'PUBLISHED' && (
+            <WeeklyReportCardViewer
+              darkMode={darkMode}
+              lang={lang}
+              t={t}
+              students={students}
+              teachers={teachers}
+              studyLogs={studyLogs}
+              assessments={approvedReports}
+              academyLogo={academyLogo}
+              showToast={showToast}
+            />
+          )}
+
+          {activeTab === 'CURRICULUM' && <CurriculumViewer darkMode={darkMode} lang={lang} />}
+
+          {activeTab === 'SETTINGS' && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className={`p-6 rounded-2xl border space-y-3 ${cardClass}`}>
+                <h3 className="text-base font-bold flex items-center gap-2">
+                  <Icon name="image" className="w-5 h-5 text-emerald-400" />
+                  {t.logoUploadTitle}
+                </h3>
+                <p className="text-xs opacity-70">{t.logoUploadDesc}</p>
+                {academyLogo && (
+                  <div className="flex items-center gap-3">
+                    <img src={academyLogo} alt="Logo" className="w-14 h-14 rounded-xl object-cover bg-white border border-emerald-500/40" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateDb({ academyLogo: '' });
+                        showToast('Logo removed.');
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 text-xs font-bold"
+                    >
+                      {t.removeLogoBtn}
+                    </button>
+                  </div>
+                )}
+                <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs cursor-pointer">
+                  <Icon name="upload" className="w-4 h-4" />
+                  <span>{t.uploadLogoBtn}</span>
+                  <input type="file" accept="image/*" onChange={handleLogoFileChange} className="hidden" />
+                </label>
+              </div>
+
+              <div className={`p-6 rounded-2xl border ${cardClass}`}>
+                <h3 className="text-base font-bold mb-2">{t.changePwdTitle}</h3>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!editFounderName.trim()) return;
+                    const updatedFounders = founders.map((f) =>
+                      f.id === selectedFounderId
+                        ? {
+                            ...f,
+                            name: editFounderName.trim(),
+                            password: newFounderPwd.trim() ? newFounderPwd.trim() : f.password
+                          }
+                        : f
+                    );
+                    updateDb({ founders: updatedFounders });
+                    setNewFounderPwd('');
+                    showToast('Founder profile updated!');
+                  }}
+                  className="space-y-3"
+                >
+                  <select
+                    value={selectedFounderId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedFounderId(id);
+                      setEditFounderName(founders.find((f) => f.id === id)?.name || '');
+                    }}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold outline-none ${inputClass}`}
+                  >
+                    {founders.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name} (Founder)
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    required
+                    value={editFounderName}
+                    onChange={(e) => setEditFounderName(e.target.value)}
+                    placeholder={t.newNameLabel}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none ${inputClass}`}
+                  />
+                  <input
+                    type="password"
+                    value={newFounderPwd}
+                    onChange={(e) => setNewFounderPwd(e.target.value)}
+                    placeholder={`${t.newPwdLabel} (Optional)`}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none ${inputClass}`}
+                  />
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs"
+                  >
+                    {t.updatePwdBtn}
+                  </button>
+                </form>
+              </div>
+
+              <div className={`p-6 rounded-2xl border ${cardClass}`}>
+                <h3 className="text-base font-bold mb-1">{t.resetDataTitle}</h3>
+                <p className="text-xs opacity-70 mb-4">{t.resetDataDesc}</p>
+                <button
+                  type="button"
+                  onClick={handleResetAllData}
+                  className="px-4 py-2.5 rounded-xl bg-red-600/90 hover:bg-red-600 text-white font-bold text-xs flex items-center gap-2"
+                >
+                  <Icon name="rotate-ccw" className="w-4 h-4" />
+                  {t.resetDataBtn}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // =========================================================================
+    // 7. TEACHER DASHBOARD
+    // =========================================================================
+    function TeacherDashboard({ darkMode, lang, t, teacher, dbState, updateDb, showToast }) {
+      const { students, studyLogs, assessments, examLinks, liveClasses = [] } = dbState;
+      const [teacherTab, setTeacherTab] = useState('LIVE_CLASS');
+      const assignedStudents = students.filter((s) => s.teacherId === teacher.id);
+      const [selectedStudentId, setSelectedStudentId] = useState(assignedStudents[0]?.id || '');
+
+      const [classForm, setClassForm] = useState({
+        topic: '',
+        courseId: assignedStudents[0]?.courseId || 'QAIDA_RECITATION',
+        schedule: 'Today • 07:30 PM IST',
+        mode: 'IN_APP_VIDEO',
+        meetUrl: '',
+        status: 'LIVE'
+      });
+      const [activeVideoRoom, setActiveVideoRoom] = useState(null);
+
+      const [reportForm, setReportForm] = useState({
+        week: 4,
+        masteryScore: 92,
+        attendanceScore: 95,
+        hifzDuaScore: 90,
+        grade: 'A+',
+        teacherRemark: ''
+      });
+
+      const selectedStudent = assignedStudents.find((s) => s.id === selectedStudentId) || assignedStudents[0];
+      const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-stone-200 text-slate-800 shadow-sm';
+      const inputClass = darkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-white border-stone-300 text-slate-900';
+
+      const myLiveClasses = liveClasses.filter((c) => c.teacherId === teacher.id);
+
+      const handlePublishClass = (e) => {
+        e.preventDefault();
+        if (!classForm.topic.trim()) return;
+        if (classForm.mode === 'EXTERNAL_LINK' && !classForm.meetUrl.trim()) {
+          showToast('Please paste a Google Meet or Zoom link.', 'error');
+          return;
+        }
+        const roomSlug = `QuranTutor-${teacher.name.replace(/[^a-zA-Z0-9]/g, '')}-${Date.now().toString().slice(-4)}`;
+        const newClass = {
+          id: `cls-${Date.now()}`,
+          topic: classForm.topic.trim(),
+          courseId: classForm.courseId,
+          teacherId: teacher.id,
+          teacherName: teacher.name,
+          schedule: classForm.schedule.trim(),
+          mode: classForm.mode,
+          roomCode: roomSlug,
+          meetUrl: classForm.meetUrl.trim(),
+          status: classForm.status
+        };
+        updateDb({ liveClasses: [newClass, ...liveClasses] });
+        setClassForm({ ...classForm, topic: '', meetUrl: '' });
+        showToast(lang === 'en' ? 'Live class published to students!' : 'ലൈവ് ക്ലാസ് കുട്ടികൾക്ക് നൽകി!');
+      };
+
+      const toggleWeekDone = (studentId, weekNum) => {
+        updateDb({
+          students: students.map((s) => {
+            if (s.id === studentId) {
+              const exists = s.completedWeeks.includes(weekNum);
+              const updated = exists ? s.completedWeeks.filter((w) => w !== weekNum) : [...s.completedWeeks, weekNum].sort((a, b) => a - b);
+              return { ...s, completedWeeks: updated };
+            }
+            return s;
+          })
+        });
+        showToast(`Week ${weekNum} updated.`);
+      };
+
+      const handleReportSubmit = (e) => {
+        e.preventDefault();
+        if (!selectedStudent) return;
+        const avg = Math.round(
+          (Number(reportForm.masteryScore) + Number(reportForm.attendanceScore) + Number(reportForm.hifzDuaScore)) / 3
+        );
+        const newRep = {
+          id: `asm-${Date.now()}`,
+          studentId: selectedStudent.id,
+          week: Number(reportForm.week),
+          teacherId: teacher.id,
+          evaluatorName: teacher.name,
+          masteryScore: Number(reportForm.masteryScore),
+          attendanceScore: Number(reportForm.attendanceScore),
+          hifzDuaScore: Number(reportForm.hifzDuaScore),
+          score: avg,
+          grade: reportForm.grade,
+          teacherRemark: reportForm.teacherRemark,
+          founderNote: '',
+          status: 'PENDING_REVIEW',
+          editedByFounder: false,
+          date: new Date().toISOString().split('T')[0]
+        };
+        updateDb({ assessments: [newRep, ...assessments] });
+        setReportForm({ ...reportForm, teacherRemark: '' });
+        showToast('Weekly progress report submitted for Founder review!');
+      };
+
+      return (
+        <div className="space-y-6">
+          {activeVideoRoom && (
+            <InAppVideoModal
+              room={activeVideoRoom}
+              userName={`${teacher.name} (Teacher)`}
+              onClose={() => setActiveVideoRoom(null)}
+            />
+          )}
+
+          <div className={`flex flex-wrap gap-2 p-2 rounded-2xl border ${cardClass}`}>
+            <button
+              onClick={() => setTeacherTab('LIVE_CLASS')}
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+                teacherTab === 'LIVE_CLASS'
+                  ? darkMode
+                    ? 'bg-emerald-500 text-slate-950'
+                    : 'bg-emerald-900 text-white'
+                  : 'opacity-75 hover:opacity-100'
+              }`}
+            >
+              <Icon name="video" className="w-4 h-4" />
+              {t.tabLiveClass} ({myLiveClasses.length})
+            </button>
+            <button
+              onClick={() => setTeacherTab('REPORTS')}
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+                teacherTab === 'REPORTS'
+                  ? darkMode
+                    ? 'bg-emerald-500 text-slate-950'
+                    : 'bg-emerald-900 text-white'
+                  : 'opacity-75 hover:opacity-100'
+              }`}
+            >
+              <Icon name="file-text" className="w-4 h-4" />
+              Assigned Students ({assignedStudents.length}) & Reports
+            </button>
+            <button
+              onClick={() => setTeacherTab('EXAMS')}
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
+                teacherTab === 'EXAMS'
+                  ? darkMode
+                    ? 'bg-emerald-500 text-slate-950'
+                    : 'bg-emerald-900 text-white'
+                  : 'opacity-75 hover:opacity-100'
+              }`}
+            >
+              <Icon name="link-2" className="w-4 h-4" />
+              {t.tabExams}
+            </button>
+          </div>
+
+          {teacherTab === 'LIVE_CLASS' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className={`lg:col-span-5 p-6 rounded-2xl border ${cardClass}`}>
+                <h3 className="text-base font-bold mb-1 flex items-center gap-2">
+                  <Icon name="video" className="w-5 h-5 text-emerald-400" />
+                  {t.liveClassroomTitle}
+                </h3>
+                <p className="text-xs opacity-70 mb-4">{t.liveClassroomSub}</p>
+
+                <form onSubmit={handlePublishClass} className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">{t.classTopicLabel}</label>
+                    <input
+                      type="text"
+                      required
+                      value={classForm.topic}
+                      onChange={(e) => setClassForm({ ...classForm, topic: e.target.value })}
+                      placeholder="e.g. Week 4: Noorani Qaida Lesson 5"
+                      className={`w-full px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold mb-1">{t.selectCourse}</label>
+                      <select
+                        value={classForm.courseId}
+                        onChange={(e) => setClassForm({ ...classForm, courseId: e.target.value })}
+                        className={`w-full px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                      >
+                        <option value="QAIDA_RECITATION">Qaida & Recitation</option>
+                        <option value="FIQH_BASICS">Fiqh & Duas</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold mb-1">{t.classScheduleLabel}</label>
+                      <input
+                        type="text"
+                        required
+                        value={classForm.schedule}
+                        onChange={(e) => setClassForm({ ...classForm, schedule: e.target.value })}
+                        className={`w-full px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">{t.meetingPlatformLabel}</label>
+                    <select
+                      value={classForm.mode}
+                      onChange={(e) => setClassForm({ ...classForm, mode: e.target.value })}
+                      className={`w-full px-3 py-2.5 rounded-xl border text-xs font-bold outline-none ${inputClass}`}
+                    >
+                      <option value="IN_APP_VIDEO">In-App Live Video Room (Built-in Video Call)</option>
+                      <option value="EXTERNAL_LINK">Google Meet / Zoom External Link</option>
+                    </select>
+                  </div>
+
+                  {classForm.mode === 'EXTERNAL_LINK' && (
+                    <div>
+                      <label className="block text-xs font-semibold mb-1">{t.meetingLinkLabel}</label>
+                      <input
+                        type="url"
+                        required
+                        value={classForm.meetUrl}
+                        onChange={(e) => setClassForm({ ...classForm, meetUrl: e.target.value })}
+                        placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                        className={`w-full px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                      />
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5"
+                  >
+                    <Icon name="video" className="w-4 h-4" />
+                    {t.publishClassBtn}
+                  </button>
+                </form>
+              </div>
+
+              <div className={`lg:col-span-7 p-6 rounded-2xl border space-y-3 ${cardClass}`}>
+                <h3 className="text-base font-bold">{t.activeLiveClasses} ({myLiveClasses.length})</h3>
+                {myLiveClasses.length === 0 ? (
+                  <p className="text-xs opacity-60">No classes created yet. Start an In-App Video Room or add a Google Meet link.</p>
+                ) : (
+                  myLiveClasses.map((cls) => (
+                    <div
+                      key={cls.id}
+                      className={`p-4 rounded-xl border text-xs space-y-2.5 ${
+                        darkMode ? 'bg-slate-950/80 border-emerald-500/40' : 'bg-stone-50 border-stone-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full bg-red-600 text-white font-bold text-[10px]">
+                            ● LIVE CLASSROOM
+                          </span>
+                          <span className="font-semibold text-emerald-400">
+                            {COURSES[cls.courseId]?.titleEn}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => updateDb({ liveClasses: liveClasses.filter((item) => item.id !== cls.id) })}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          <Icon name="trash-2" className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <p className="font-bold text-sm">{cls.topic}</p>
+                      <p className="opacity-75">{cls.schedule}</p>
+
+                      <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+                        {cls.mode === 'IN_APP_VIDEO' ? (
+                          <button
+                            type="button"
+                            onClick={() => setActiveVideoRoom(cls)}
+                            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5"
+                          >
+                            <Icon name="video" className="w-4 h-4" />
+                            {t.joinInAppVideoBtn}
+                          </button>
+                        ) : (
+                          <a
+                            href={cls.meetUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5"
+                          >
+                            <Icon name="external-link" className="w-4 h-4" />
+                            {t.openMeetLinkBtn}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : teacherTab === 'EXAMS' ? (
+            <ExamLinksManager darkMode={darkMode} t={t} examLinks={examLinks} updateDb={updateDb} postedBy={teacher.name} showToast={showToast} />
+          ) : assignedStudents.length === 0 ? (
+            <div className={`p-8 rounded-2xl border text-center text-sm ${cardClass}`}>
+              No students have been assigned to you by the Founder yet.
+            </div>
+          ) : (
+            <div className={`p-6 rounded-2xl border space-y-6 ${cardClass}`}>
+              <div className="flex flex-wrap gap-2">
+                {assignedStudents.map((st) => (
+                  <button
+                    key={st.id}
+                    onClick={() => setSelectedStudentId(st.id)}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition ${
+                      selectedStudent?.id === st.id
+                        ? darkMode
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                          : 'bg-emerald-900 text-white border-emerald-900'
+                        : darkMode
+                        ? 'bg-slate-950 border-slate-800 text-slate-300'
+                        : 'bg-stone-50 border-stone-200 text-slate-700'
+                    }`}
+                  >
+                    {st.name} (Age {st.age}) • {COURSES[st.courseId]?.titleEn}
+                  </button>
+                ))}
+              </div>
+
+              {selectedStudent && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-6 space-y-5">
+                    <div className={`p-5 rounded-2xl border ${darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-indigo-50/40 border-indigo-200'}`}>
+                      <h3 className="font-bold text-base mb-1">{t.submitReportTitle}</h3>
+                      <p className="text-xs opacity-70 mb-4">{t.submitReportSub}</p>
+                      <form onSubmit={handleReportSubmit} className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold mb-1">{t.weekLabel}</label>
+                            <select
+                              value={reportForm.week}
+                              onChange={(e) => setReportForm({ ...reportForm, week: e.target.value })}
+                              className={`w-full px-3 py-2 rounded-xl border text-xs ${inputClass}`}
+                            >
+                              {[...Array(12)].map((_, i) => (
+                                <option key={i + 1} value={i + 1}>
+                                  Week {i + 1}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold mb-1">{t.overallGrade}</label>
+                            <select
+                              value={reportForm.grade}
+                              onChange={(e) => setReportForm({ ...reportForm, grade: e.target.value })}
+                              className={`w-full px-3 py-2 rounded-xl border text-xs ${inputClass}`}
+                            >
+                              <option value="A+">A+</option>
+                              <option value="A">A</option>
+                              <option value="B+">B+</option>
+                              <option value="B">B</option>
+                              <option value="C">C</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="block text-[11px] font-semibold mb-1">{t.masteryScore}</label>
+                            <input
+                              type="number"
+                              value={reportForm.masteryScore}
+                              onChange={(e) => setReportForm({ ...reportForm, masteryScore: e.target.value })}
+                              className={`w-full px-2.5 py-2 rounded-xl border text-xs ${inputClass}`}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-semibold mb-1">{t.attendanceScore}</label>
+                            <input
+                              type="number"
+                              value={reportForm.attendanceScore}
+                              onChange={(e) => setReportForm({ ...reportForm, attendanceScore: e.target.value })}
+                              className={`w-full px-2.5 py-2 rounded-xl border text-xs ${inputClass}`}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-semibold mb-1">{t.hifzDuaScore}</label>
+                            <input
+                              type="number"
+                              value={reportForm.hifzDuaScore}
+                              onChange={(e) => setReportForm({ ...reportForm, hifzDuaScore: e.target.value })}
+                              className={`w-full px-2.5 py-2 rounded-xl border text-xs ${inputClass}`}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold mb-1">{t.teacherRemarks}</label>
+                          <textarea
+                            rows="3"
+                            required
+                            value={reportForm.teacherRemark}
+                            onChange={(e) => setReportForm({ ...reportForm, teacherRemark: e.target.value })}
+                            placeholder="Write weekly progress remarks..."
+                            className={`w-full px-3 py-2 rounded-xl border text-xs ${inputClass}`}
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5"
+                        >
+                          <Icon name="send" className="w-3.5 h-3.5" /> {t.submitToFounderBtn}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-6 space-y-4">
+                    <h3 className="font-bold text-sm">{COURSES[selectedStudent.courseId]?.titleEn} — Weekly Completion</h3>
+                    <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                      {COURSES[selectedStudent.courseId]?.months.flatMap((m) =>
+                        m.weeks.map((w) => {
+                          const done = selectedStudent.completedWeeks.includes(w.week);
+                          return (
+                            <div
+                              key={w.week}
+                              className={`p-3 rounded-xl border flex items-center justify-between gap-2 text-xs ${
+                                darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-stone-50 border-stone-200'
+                              }`}
+                            >
+                              <div>
+                                <span className="font-bold text-emerald-400">
+                                  Week {w.week} ({w.classes})
+                                </span>
+                                <p className="font-semibold mt-0.5">{lang === 'en' ? w.topicEn : w.topicMl}</p>
+                              </div>
+                              <button
+                                onClick={() => toggleWeekDone(selectedStudent.id, w.week)}
+                                className={`px-3 py-1.5 rounded-lg font-bold shrink-0 ${
+                                  done
+                                    ? 'bg-emerald-500 text-slate-950'
+                                    : darkMode
+                                    ? 'bg-slate-800 text-slate-300'
+                                    : 'bg-stone-200 text-slate-700'
+                                }`}
+                              >
+                                {done ? '✓ Done' : 'Mark Done'}
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // =========================================================================
+    // 8. EXAM LINKS MANAGER
+    // =========================================================================
+    function ExamLinksManager({ darkMode, t, examLinks, updateDb, postedBy, showToast }) {
+      const [form, setForm] = useState({
+        title: '',
+        courseId: 'QAIDA_RECITATION',
+        week: 4,
+        dateTime: 'Dec 28, 2026 • 08:00 PM',
+        duration: '20 Mins',
+        status: 'LIVE',
+        examUrl: ''
+      });
+
+      const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-stone-200 text-slate-800 shadow-sm';
+      const inputClass = darkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-white border-stone-300 text-slate-900';
+
+      const handleAdd = (e) => {
+        e.preventDefault();
+        if (!form.title.trim() || !form.examUrl.trim()) return;
+        const newExam = {
+          id: `exm-${Date.now()}`,
+          title: form.title.trim(),
+          courseId: form.courseId,
+          week: Number(form.week),
+          dateTime: form.dateTime.trim(),
+          duration: form.duration.trim(),
+          status: form.status,
+          examUrl: form.examUrl.trim(),
+          postedBy
+        };
+        updateDb({ examLinks: [newExam, ...examLinks] });
+        setForm({ ...form, title: '', examUrl: '' });
+        showToast('Exam link published!');
+      };
+
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className={`lg:col-span-5 p-6 rounded-2xl border ${cardClass}`}>
+            <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+              <Icon name="plus-circle" className="w-5 h-5 text-emerald-400" />
+              {t.postExamTitle}
+            </h3>
+            <form onSubmit={handleAdd} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold mb-1">{t.examTitleLabel}</label>
+                <input
+                  type="text"
+                  required
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="e.g. Week 4 Live Tajweed Quiz"
+                  className={`w-full px-3 py-2 rounded-xl border text-xs outline-none ${inputClass}`}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold mb-1">{t.selectCourse}</label>
+                  <select
+                    value={form.courseId}
+                    onChange={(e) => setForm({ ...form, courseId: e.target.value })}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs outline-none ${inputClass}`}
+                  >
+                    <option value="QAIDA_RECITATION">Qaida & Recitation</option>
+                    <option value="FIQH_BASICS">Fiqh & Duas</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">{t.weekLabel}</label>
+                  <select
+                    value={form.week}
+                    onChange={(e) => setForm({ ...form, week: e.target.value })}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs outline-none ${inputClass}`}
+                  >
+                    {[...Array(12)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        Week {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  required
+                  value={form.dateTime}
+                  onChange={(e) => setForm({ ...form, dateTime: e.target.value })}
+                  className={`w-full px-3 py-2 rounded-xl border text-xs outline-none ${inputClass}`}
+                />
+                <input
+                  type="text"
+                  required
+                  value={form.duration}
+                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                  className={`w-full px-3 py-2 rounded-xl border text-xs outline-none ${inputClass}`}
+                />
+              </div>
+              <input
+                type="url"
+                required
+                value={form.examUrl}
+                onChange={(e) => setForm({ ...form, examUrl: e.target.value })}
+                placeholder="https://forms.gle/..."
+                className={`w-full px-3 py-2 rounded-xl border text-xs outline-none ${inputClass}`}
+              />
+              <select
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                className={`w-full px-3 py-2 rounded-xl border text-xs outline-none ${inputClass}`}
+              >
+                <option value="LIVE">LIVE NOW</option>
+                <option value="UPCOMING">UPCOMING</option>
+                <option value="COMPLETED">COMPLETED</option>
+              </select>
+              <button type="submit" className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs">
+                {t.publishExamBtn}
+              </button>
+            </form>
+          </div>
+
+          <div className={`lg:col-span-7 p-6 rounded-2xl border space-y-3 ${cardClass}`}>
+            <h3 className="text-base font-bold">Published Exam Links ({examLinks.length})</h3>
+            {examLinks.map((ex) => (
+              <div
+                key={ex.id}
+                className={`p-4 rounded-xl border text-xs space-y-2 ${
+                  darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-stone-50 border-stone-200'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full font-bold text-[10px] bg-red-500/20 text-red-400 border border-red-500/40">
+                      {ex.status === 'LIVE' ? '● LIVE NOW' : ex.status}
+                    </span>
+                    <span className="font-semibold text-emerald-400">
+                      {COURSES[ex.courseId]?.titleEn} • Week {ex.week}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => updateDb({ examLinks: examLinks.filter((item) => item.id !== ex.id) })}
+                    className="text-red-400 hover:text-red-300"
+                  >
+                    <Icon name="x" className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="font-bold text-sm">{ex.title}</p>
+                <a href={ex.examUrl} target="_blank" rel="noreferrer" className="text-emerald-400 underline inline-flex items-center gap-1">
+                  {ex.examUrl} <Icon name="external-link" className="w-3 h-3" />
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // =========================================================================
+    // 9. STUDENT DASHBOARD
+    // =========================================================================
+    function StudentDashboard({ darkMode, lang, t, student, dbState, updateDb, showToast }) {
+      const { teachers, studyLogs, assessments, examLinks, liveClasses = [] } = dbState;
+      const course = COURSES[student.courseId] || COURSES.QAIDA_RECITATION;
+      const teacher = teachers.find((tch) => tch.id === student.teacherId);
+      const studentLiveClasses = liveClasses.filter(
+        (c) => c.teacherId === student.teacherId || c.courseId === student.courseId
+      );
+      const courseExams = examLinks.filter((ex) => ex.courseId === student.courseId);
+      const studentLogs = studyLogs.filter((l) => l.studentId === student.id);
+
+      const [activeVideoRoom, setActiveVideoRoom] = useState(null);
+      const [mockExam, setMockExam] = useState(null);
+      const [quizAnswers, setQuizAnswers] = useState({});
+      const [quizResult, setQuizResult] = useState(null);
+
+      const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-stone-200 text-slate-800 shadow-sm';
+      const progressPct = Math.round((student.completedWeeks.length / 12) * 100);
+
+      const dynamicWeeks = getDynamicWeeks(student.startDate || '2026-12-01');
+
+      return (
+        <div className="space-y-6">
+          {activeVideoRoom && (
+            <InAppVideoModal
+              room={activeVideoRoom}
+              userName={`${student.name} (Student)`}
+              onClose={() => setActiveVideoRoom(null)}
+            />
+          )}
+
+          <div
+            className={`rounded-2xl p-6 border ${
+              darkMode
+                ? 'bg-gradient-to-r from-slate-900 via-emerald-950/60 to-slate-900 border-emerald-800/60'
+                : 'bg-gradient-to-r from-emerald-950 to-emerald-900 text-white border-emerald-800'
+            }`}
+          >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">
+                  Start Date: {student.startDate || '2026-12-01'} • Teacher: {teacher?.name || 'Assigned'}
+                </span>
+                <h2 className="text-2xl font-bold text-white mt-2">{lang === 'en' ? course.titleEn : course.titleMl}</h2>
+                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">{lang === 'en' ? course.descEn : course.descMl}</p>
+              </div>
+              <div className={`p-4 rounded-xl border shrink-0 min-w-[210px] ${darkMode ? 'bg-slate-950/80 border-slate-800' : 'bg-emerald-950/70 border-emerald-700 text-white'}`}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Syllabus Progress</span>
+                  <span className="font-bold text-amber-400">{progressPct}%</span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2.5 mb-2">
+                  <div className="bg-emerald-400 h-2.5 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+                </div>
+                <p className="text-xs opacity-80">
+                  {student.completedWeeks.length * 3} / 36 {t.classesCompletedStat}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-2xl border space-y-4 ${cardClass}`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <Icon name="video" className="w-5 h-5 text-emerald-400" />
+                {t.liveClassroomTitle}
+              </h3>
+              <span className="text-xs opacity-70">{teacher?.name}</span>
+            </div>
+
+            {studentLiveClasses.length === 0 ? (
+              <p className="text-xs opacity-60">No active class links posted right now.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {studentLiveClasses.map((cls) => (
+                  <div
+                    key={cls.id}
+                    className={`p-5 rounded-2xl border space-y-3 ${
+                      darkMode ? 'bg-slate-950 border-emerald-500/50' : 'bg-emerald-50/50 border-emerald-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[10px]">
+                        ● LIVE CLASS
+                      </span>
+                      <span className="opacity-75">{cls.schedule}</span>
+                    </div>
+                    <h4 className="font-bold text-base">{cls.topic}</h4>
+                    <p className="text-xs opacity-75">Teacher: {cls.teacherName}</p>
+                    <div className="flex justify-end pt-1">
+                      {cls.mode === 'IN_APP_VIDEO' ? (
+                        <button
+                          type="button"
+                          onClick={() => setActiveVideoRoom(cls)}
+                          className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-md"
+                        >
+                          <Icon name="video" className="w-4 h-4" />
+                          {t.joinInAppVideoBtn}
+                        </button>
+                      ) : (
+                        <a
+                          href={cls.meetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-md"
+                        >
+                          <Icon name="external-link" className="w-4 h-4" />
+                          {t.openMeetLinkBtn}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={`p-6 rounded-2xl border space-y-4 ${cardClass}`}>
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <Icon name="radio" className="w-5 h-5 text-red-400" />
+              {t.liveExamPortal}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {courseExams.map((exam) => (
+                <div key={exam.id} className={`p-5 rounded-2xl border space-y-3 ${darkMode ? 'bg-slate-950 border-emerald-500/40' : 'bg-stone-50 border-stone-200'}`}>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="px-2.5 py-0.5 rounded-full bg-red-600 text-white font-bold text-[10px]">LIVE NOW</span>
+                    <span className="opacity-70">Week {exam.week} • {exam.duration}</span>
+                  </div>
+                  <h4 className="font-bold text-base">{exam.title}</h4>
+                  <div className="flex justify-end gap-2">
+                    <a
+                      href={exam.examUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3.5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs inline-flex items-center gap-1"
+                    >
+                      {t.openExamLink} <Icon name="external-link" className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold">{t.tabCurriculum} (36 Classes • Start: {student.startDate || '2026-12-01'})</h3>
+            {course.months.map((m, mIdx) => (
+              <div key={m.month} className={`rounded-2xl border overflow-hidden ${cardClass}`}>
+                <div className={`px-5 py-3 font-bold text-sm border-b ${darkMode ? 'bg-slate-950 border-slate-800 text-emerald-400' : 'bg-stone-100'}`}>
+                  {lang === 'en' ? m.titleEn : m.titleMl}
+                </div>
+                <div className={`divide-y ${darkMode ? 'divide-slate-800' : 'divide-stone-100'}`}>
+                  {m.weeks.map((wk, wIdx) => {
+                    const globalWeekNum = mIdx * 4 + (wIdx + 1);
+                    const dynInfo = dynamicWeeks.find((dw) => dw.weekNum === globalWeekNum);
+                    const done = student.completedWeeks.includes(globalWeekNum);
+                    return (
+                      <div key={wk.week} className="p-4 text-xs">
+                        <div className="flex justify-between font-bold mb-1">
+                          <span className="text-emerald-400">
+                            Week {globalWeekNum} ({wk.classes}) • {dynInfo ? dynInfo.dateStr : ''}
+                          </span>
+                          <span>{done ? '✓ Completed' : 'Scheduled'}</span>
+                        </div>
+                        <p className="font-bold text-sm mb-1">{lang === 'en' ? wk.topicEn : wk.topicMl}</p>
+                        <ul className="list-disc list-inside opacity-80">
+                          {wk.details.map((d, i) => (
+                            <li key={i}>{d}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // =========================================================================
+    // 10. PARENT DASHBOARD
+    // =========================================================================
+    function ParentDashboard({ darkMode, lang, t, parent, dbState, updateDb, showToast }) {
+      const { students, teachers, studyLogs, assessments, academyLogo } = dbState;
+      const child = students.find((s) => s.id === parent.studentId) || students[0];
+      const [logForm, setLogForm] = useState({
+        week: child ? Math.min(child.completedWeeks.length + 1, 12) : 1,
+        date: new Date().toISOString().split('T')[0],
+        hours: '3.5',
+        notes: ''
+      });
+
+      const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-stone-200 text-slate-800 shadow-sm';
+      const inputClass = darkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-white border-stone-300 text-slate-900';
+
+      if (!child) return null;
+      const approvedChildReports = assessments.filter((a) => a.studentId === child.id && a.status === 'APPROVED');
+
+      const handleSaveStudyHours = (e) => {
+        e.preventDefault();
+        if (!logForm.hours || Number(logForm.hours) <= 0) return;
+        const newLog = {
+          id: `log-${Date.now()}`,
+          studentId: child.id,
+          parentName: parent.name,
+          week: Number(logForm.week),
+          date: logForm.date,
+          hours: Number(logForm.hours),
+          notes: logForm.notes.trim() || 'Home revision completed.'
+        };
+        updateDb({ studyLogs: [newLog, ...studyLogs] });
+        setLogForm({ ...logForm, notes: '' });
+        showToast('Home study hours saved!');
+      };
+
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className={`lg:col-span-5 p-6 rounded-2xl border h-fit no-print ${cardClass}`}>
+            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
+              <Icon name="clock" className="w-5 h-5 text-amber-400" />
+              {t.logHomeStudyTitle}
+            </h2>
+            <p className="text-xs opacity-70 mb-4">{t.logHomeStudySub}</p>
+            <form onSubmit={handleSaveStudyHours} className="space-y-3.5">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold mb-1">{t.weekLabel}</label>
+                  <select
+                    value={logForm.week}
+                    onChange={(e) => setLogForm({ ...logForm, week: e.target.value })}
+                    className={`w-full px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                  >
+                    {[...Array(12)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        Week {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">{t.studyDateLabel}</label>
+                  <input
+                    type="date"
+                    required
+                    value={logForm.date}
+                    onChange={(e) => setLogForm({ ...logForm, date: e.target.value })}
+                    className={`w-full px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1">{t.studyHoursLabel}</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0.5"
+                  max="24"
+                  required
+                  value={logForm.hours}
+                  onChange={(e) => setLogForm({ ...logForm, hours: e.target.value })}
+                  className={`w-full px-3 py-2.5 rounded-xl border text-sm outline-none ${inputClass}`}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1">{t.studyNotesLabel}</label>
+                <textarea
+                  rows="3"
+                  required
+                  value={logForm.notes}
+                  onChange={(e) => setLogForm({ ...logForm, notes: e.target.value })}
+                  className={`w-full px-3 py-2.5 rounded-xl border text-xs outline-none ${inputClass}`}
+                />
+              </div>
+              <button type="submit" className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm">
+                {t.saveStudyLogBtn}
+              </button>
+            </form>
+          </div>
+
+          <div className="lg:col-span-7">
+            <WeeklyReportCardViewer
+              darkMode={darkMode}
+              lang={lang}
+              t={t}
+              students={[child]}
+              teachers={teachers}
+              studyLogs={studyLogs}
+              assessments={approvedChildReports}
+              academyLogo={academyLogo}
+              showToast={showToast}
+              singleMode
+            />
+          </div>
+        </div>
+      );
+    }
+
+    function WeeklyReportCardViewer({ darkMode, lang, t, students, teachers, studyLogs, assessments, academyLogo, showToast, singleMode = false }) {
+      const [selectedId, setSelectedId] = useState(students[0]?.id || '');
+      const student = students.find((s) => s.id === selectedId) || students[0];
+      const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-stone-200 text-slate-800 shadow-sm';
+
+      if (!student) return null;
+      const course = COURSES[student.courseId] || COURSES.QAIDA_RECITATION;
+      const teacher = teachers.find((tch) => tch.id === student.teacherId);
+      const stLogs = studyLogs.filter((l) => l.studentId === student.id);
+      const stReports = assessments.filter((a) => a.studentId === student.id);
+      const latest = stReports[0];
+      const totalHours = stLogs.reduce((sum, l) => sum + Number(l.hours), 0);
+
+      const handleShare = () => {
+        const text =
+          `*Quran Tutor — Weekly Progress Report*\nStudent: ${student.name} (Age ${student.age})\n` +
+          `Course: ${course.titleEn}\nTeacher: ${teacher?.name || '-'}\nClasses Completed: ${student.completedWeeks.length * 3} / 36\n` +
+          `Home Study Hours: ${totalHours} hrs\n` +
+          (latest ? `Latest Verified Grade: ${latest.grade} (${latest.score}%)\nRemarks: ${latest.founderNote || latest.teacherRemark}` : '');
+        if (navigator.clipboard) navigator.clipboard.writeText(text);
+        showToast('Report summary copied!');
+      };
+
+      return (
+        <div className="space-y-4">
+          {!singleMode && (
+            <div className={`p-4 rounded-2xl border flex items-center gap-3 no-print ${cardClass}`}>
+              <span className="text-xs font-bold opacity-75">{t.roleStudent}:</span>
+              <select
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
+                className={`px-3 py-2 rounded-xl border text-xs font-bold outline-none ${
+                  darkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-stone-50 border-stone-300'
+                }`}
+              >
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className={`rounded-2xl border overflow-hidden ${cardClass}`}>
+            <div
+              className={`p-6 flex flex-wrap items-center justify-between gap-4 border-b ${
+                darkMode ? 'bg-gradient-to-r from-emerald-950 to-slate-900 border-slate-800' : 'bg-emerald-950 text-white border-emerald-900'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {academyLogo && <img src={academyLogo} alt="Logo" className="w-12 h-12 rounded-xl object-cover bg-white border border-amber-400/50" />}
+                <div>
+                  <span className="text-[11px] uppercase tracking-widest font-bold text-amber-400">{t.officialReportCard}</span>
+                  <h3 className="text-xl font-bold text-white mt-0.5">{t.brandName}</h3>
+                  <p className="text-xs text-emerald-200">{t.brandTagline}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 no-print">
+                <button onClick={handleShare} className="px-3 py-2 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5">
+                  <Icon name="share-2" className="w-3.5 h-3.5" /> {t.shareSummary}
+                </button>
+                <button onClick={() => window.print()} className="px-3 py-2 rounded-xl bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5">
+                  <Icon name="printer" className="w-3.5 h-3.5" /> {t.printCard}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl border text-xs ${darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-stone-50 border-stone-200'}`}>
+                <div>
+                  <span className="opacity-60 block">{t.studentName}</span>
+                  <span className="font-bold text-sm">
+                    {student.name} (Age {student.age})
+                  </span>
+                </div>
+                <div>
+                  <span className="opacity-60 block">Course</span>
+                  <span className="font-bold text-emerald-400">{lang === 'en' ? course.titleEn : course.titleMl}</span>
+                </div>
+                <div>
+                  <span className="opacity-60 block">{t.roleTeacher}</span>
+                  <span className="font-bold">{teacher?.name || '-'}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className={`p-3.5 rounded-xl border ${darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-emerald-50 border-emerald-200'}`}>
+                  <p className="text-[11px] opacity-70">{t.classesCompletedStat}</p>
+                  <p className="text-lg font-bold text-emerald-400 mt-0.5">{student.completedWeeks.length * 3} / 36</p>
+                </div>
+                <div className={`p-3.5 rounded-xl border ${darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-amber-50 border-amber-200'}`}>
+                  <p className="text-[11px] opacity-70">{t.homeStudyHoursStat}</p>
+                  <p className="text-lg font-bold text-amber-400 mt-0.5">{totalHours} hrs</p>
+                </div>
+                <div className={`p-3.5 rounded-xl border ${darkMode ? 'bg-slate-950/70 border-slate-800' : 'bg-purple-50 border-purple-200'}`}>
+                  <p className="text-[11px] opacity-70">{t.latestGradeStat}</p>
+                  <p className="text-lg font-bold text-purple-400 mt-0.5">{latest ? `${latest.grade} (${latest.score}%)` : 'Pending'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function CurriculumViewer({ darkMode, lang }) {
+      const [courseKey, setCourseKey] = useState('QAIDA_RECITATION');
+      const course = COURSES[courseKey];
+      const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-stone-200 text-slate-800 shadow-sm';
+
+      return (
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setCourseKey('QAIDA_RECITATION')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold ${
+                courseKey === 'QAIDA_RECITATION' ? 'bg-emerald-500 text-slate-950' : darkMode ? 'bg-slate-900 text-slate-300 border border-slate-800' : 'bg-white border'
+              }`}
+            >
+              Course 1: {lang === 'en' ? COURSES.QAIDA_RECITATION.titleEn : COURSES.QAIDA_RECITATION.titleMl}
+            </button>
+            <button
+              onClick={() => setCourseKey('FIQH_BASICS')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold ${
+                courseKey === 'FIQH_BASICS' ? 'bg-emerald-500 text-slate-950' : darkMode ? 'bg-slate-900 text-slate-300 border border-slate-800' : 'bg-white border'
+              }`}
+            >
+              Course 2: {lang === 'en' ? COURSES.FIQH_BASICS.titleEn : COURSES.FIQH_BASICS.titleMl}
+            </button>
+          </div>
+
+          {course.months.map((m) => (
+            <div key={m.month} className={`rounded-2xl border overflow-hidden ${cardClass}`}>
+              <div className={`px-5 py-3 font-bold text-sm border-b ${darkMode ? 'bg-slate-950 border-slate-800 text-emerald-400' : 'bg-emerald-950 text-amber-300'}`}>
+                {lang === 'en' ? m.titleEn : m.titleMl}
+              </div>
+              <div className={`divide-y ${darkMode ? 'divide-slate-800' : 'divide-stone-100'}`}>
+                {m.weeks.map((w) => (
+                  <div key={w.week} className="p-4 text-xs">
+                    <div className="font-bold text-emerald-400 mb-1">
+                      Week {w.week} • {w.classes}
+                    </div>
+                    <p className="font-bold text-sm mb-1">{lang === 'en' ? w.topicEn : w.topicMl}</p>
+                    <ul className="list-disc list-inside opacity-80">
+                      {w.details.map((d, i) => (
+                        <li key={i}>{d}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function InAppVideoModal({ room, userName, onClose }) {
+      const encodedName = encodeURIComponent(userName || 'Quran Tutor User');
+      const roomName = encodeURIComponent(room.roomCode || 'QuranTutorLiveClass');
+      const jitsiUrl = `https://meet.jit.si/${roomName}#userInfo.displayName="${encodedName}"&config.prejoinPageEnabled=false`;
+
+      return (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex flex-col p-3 sm:p-6">
+          <div className="max-w-6xl w-full mx-auto flex-1 flex flex-col bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="px-4 py-3 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <span className="px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold">
+                  ● IN-APP LIVE VIDEO
+                </span>
+                <h4 className="font-bold text-sm sm:text-base text-white truncate max-w-md">
+                  {room.topic}
+                </h4>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={jitsiUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-bold inline-flex items-center gap-1"
+                >
+                  Open Full Tab <Icon name="external-link" className="w-3.5 h-3.5" />
+                </a>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold inline-flex items-center gap-1"
+                >
+                  Leave Class <Icon name="x" className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 bg-black relative">
+              <iframe
+                src={jitsiUrl}
+                allow="camera; microphone; fullscreen; display-capture; autoplay"
+                className="w-full h-full border-0"
+                title="Quran Tutor Live Video Classroom"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
